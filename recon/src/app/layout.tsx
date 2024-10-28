@@ -1,7 +1,7 @@
 import "../styles/globals.css"
 import { ReactNode } from "react" // Import React types
 import { ThemeProvider } from "@/components/theme-provider"
-import NavBar from "@/components/navbar/navbar"
+import NavBar from "@/components/navbar/nav-bar"
 
 interface RootLayoutProps {
   children: ReactNode
