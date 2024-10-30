@@ -1,22 +1,26 @@
+import { faker } from "@faker-js/faker"
+
 import { SearchResults, columns } from "./columns"
 import { DataTable } from "./data-table"
 
+// Function to generate random search results
+const generateRandomSearchResults = (): SearchResults => {
+  return {
+    id: faker.string.uuid(),
+    time: faker.date.recent().toISOString(), // Generates a recent date as an ISO string
+    string: faker.lorem.sentence(), // Generates a random sentence
+    screenshot: faker.image.url(), // Generates a random image URL
+    subRows: {
+      uploadedBy: faker.person.firstName(), // Random name for the uploader
+      username: faker.internet.username(), // Random username
+      guid: faker.string.uuid(), // Random GUID
+    },
+  }
+}
+
 async function getData(): Promise<SearchResults[]> {
   // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      time: "1:00 AM",
-      string: "pending",
-      screenshot: "abc.png",
-      subRows: {
-        uploadedBy: "User2",
-        username: "user2",
-        guid: "guid-2",
-      },
-    },
-    // ...
-  ]
+  return faker.helpers.multiple(generateRandomSearchResults, { count: 15 })
 }
 
 export default async function DemoPage() {
