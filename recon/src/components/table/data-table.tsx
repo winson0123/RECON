@@ -61,7 +61,13 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    style={{
+                      width:
+                        header.getSize() !== 150 ? header.getSize() : "auto",
+                    }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -79,7 +85,15 @@ export function DataTable<TData, TValue>({
                 <React.Fragment key={row.id}>
                   <TableRow>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell
+                        key={cell.id}
+                        className="align-top first:cursor-pointer first:border-r"
+                        onClick={
+                          cell.getValue() === undefined
+                            ? () => row.toggleExpanded()
+                            : undefined
+                        } // Only apply onClick to the first cell
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -87,10 +101,6 @@ export function DataTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {/* Expanded Row Content */}
-                  {row.getIsExpanded() && (
-                    <RowContent rowId={row.id} rowData={row.original} />
-                  )}
                 </React.Fragment>
               ))
             ) : (

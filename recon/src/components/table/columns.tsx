@@ -1,5 +1,6 @@
 "use client"
 
+import { InfoCircledIcon } from "@radix-ui/react-icons"
 import { ColumnDef } from "@tanstack/react-table"
 import {
   ArrowDown,
@@ -17,7 +18,10 @@ export type SearchResults = {
   time: string
   string: string
   screenshot: string
-  subRows: SubSearchResults
+  window: string
+  host: string
+  source: string
+  sourcetype: string
 }
 
 export type SubSearchResults = {
@@ -29,9 +33,10 @@ export type SubSearchResults = {
 export const columns: ColumnDef<SearchResults>[] = [
   {
     id: "expand",
+    header: ({}) => <InfoCircledIcon />,
     cell: ({ row }) => {
       return (
-        <div className="cursor-pointer" onClick={() => row.toggleExpanded()}>
+        <div>
           {row.getIsExpanded() ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
@@ -43,6 +48,7 @@ export const columns: ColumnDef<SearchResults>[] = [
   },
   {
     accessorKey: "time",
+    size: 120,
     header: ({ column }) => (
       <Button variant="ghost" onClick={column.getToggleSortingHandler()}>
         Time
@@ -58,9 +64,10 @@ export const columns: ColumnDef<SearchResults>[] = [
   },
   {
     accessorKey: "string",
+    size: 650,
     header: ({ column }) => (
       <Button variant="ghost" onClick={column.getToggleSortingHandler()}>
-        String
+        Strings captured
         {column.getIsSorted() === "asc" ? (
           <ArrowDown className="ml-2 h-4 w-4" />
         ) : column.getIsSorted() === "desc" ? (
@@ -70,6 +77,30 @@ export const columns: ColumnDef<SearchResults>[] = [
         )}
       </Button>
     ),
+    cell: ({ row }) => {
+      const value = row.getValue("string") as string
+      return (
+        <>
+          <div>
+            {!row.getIsExpanded() && value.length > 90
+              ? value.substring(0, 90) + "..."
+              : value}
+          </div>
+          <div className="mt-4 flex flex-wrap space-x-1 overflow-hidden">
+            <div>host = {row.original.host}</div>
+            <div className="before:mr-1 before:content-['|']">
+              window = {row.original.window}
+            </div>
+            <div className="before:mr-1 before:content-['|']">
+              source = {row.original.source}
+            </div>
+            <div className="before:mr-1 before:content-['|']">
+              sourcetype = {row.original.sourcetype}
+            </div>
+          </div>
+        </>
+      )
+    },
   },
   {
     accessorKey: "screenshot",

@@ -8,13 +8,13 @@ const generateRandomSearchResults = (): SearchResults => {
   return {
     id: faker.string.uuid(),
     time: faker.date.recent().toISOString(), // Generates a recent date as an ISO string
-    string: faker.lorem.sentence(), // Generates a random sentence
+    string: faker.lorem.paragraphs(), // Generates a random sentence
     screenshot: faker.image.url(), // Generates a random image URL
-    subRows: {
-      uploadedBy: faker.person.firstName(), // Random name for the uploader
-      username: faker.internet.username(), // Random username
-      guid: faker.string.uuid(), // Random GUID
-    },
+    host: faker.hacker.adjective(), // Generates a random hostname
+    window: faker.system.commonFileName(), // Generates a random Window name
+    source: faker.system.directoryPath(), // Generates a random source filepath
+    sourcetype:
+      faker.number.int() % 2 === 0 ? "Text matches" : "Visual matches", // Generates a source type, text/visual
   }
 }
 
