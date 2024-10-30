@@ -1,5 +1,7 @@
 import * as React from "react"
 
+import DemoPage from "@/components/table/page"
+
 export default function Home() {
-  return <h1>Hello World</h1>
+  return <DemoPage />
 }
