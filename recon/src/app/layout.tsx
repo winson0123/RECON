@@ -1,7 +1,10 @@
 import "../styles/globals.css"
 import { ReactNode } from "react" // Import React types
-import { ThemeProvider } from "@/components/theme-provider"
+
 import NavBar from "@/components/navbar/nav-bar"
+import { AppSidebar } from "@/components/sidebar/app-sidebar"
+import { ThemeProvider } from "@/components/theme-provider"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 interface RootLayoutProps {
   children: ReactNode
@@ -21,9 +24,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           {/* Navbar */}
           <NavBar />
+          <SidebarProvider>
+            {/* Sidebar */}
+            <AppSidebar />
 
-          {/* Main body */}
-          {children}
+            {/* Main body */}
+            {children}
+          </SidebarProvider>
 
           {/* Footer */}
         </ThemeProvider>
