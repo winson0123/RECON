@@ -88,15 +88,21 @@ export const columns: ColumnDef<SearchResults>[] = [
                 : value}
             </div>
             <div className="flex flex-wrap space-x-1 overflow-hidden">
-              <div>host = {row.original.host}</div>
-              <div className="before:mr-1 before:content-['|']">
-                window = {row.original.window}
+              <div className="ml-1 flex">
+                <div className="text-slate-500"> host = </div>
+                <div className="ml-1">{row.original.host}</div>
               </div>
-              <div className="before:mr-1 before:content-['|']">
-                source = {row.original.source}
+              <div className="flex before:content-['|']">
+                <div className="text-slate-500 before:mr-1">window =</div>
+                <div className="ml-1">{row.original.window}</div>
               </div>
-              <div className="before:mr-1 before:content-['|']">
-                sourcetype = {row.original.sourcetype}
+              <div className="flex before:content-['|']">
+                <div className="text-slate-500 before:mr-1">source = </div>
+                <div className="ml-1">{row.original.source}</div>
+              </div>
+              <div className="flex before:content-['|']">
+                <div className="text-slate-500 before:mr-1">sourcetype = </div>
+                <div className="ml-1">{row.original.sourcetype}</div>
               </div>
             </div>
           </div>
