@@ -82,12 +82,13 @@ export const columns: ColumnDef<SearchResults>[] = [
       const value = row.getValue("string") as string
       return (
         <>
-          <div>
-            {!row.getIsExpanded() && value.length > 90
-              ? value.substring(0, 90) + "..."
+          <div className="flex h-full flex-col justify-between">
+            <div className="flex-1">
+              {!row.getIsExpanded() && value.length > 255
+                ? value.substring(0, 255) + "..."
                 : value}
             </div>
-          <div className="mt-4 flex flex-wrap space-x-1 overflow-hidden">
+            <div className="flex flex-wrap space-x-1 overflow-hidden">
               <div>host = {row.original.host}</div>
               <div className="before:mr-1 before:content-['|']">
                 window = {row.original.window}
@@ -97,6 +98,7 @@ export const columns: ColumnDef<SearchResults>[] = [
               </div>
               <div className="before:mr-1 before:content-['|']">
                 sourcetype = {row.original.sourcetype}
+              </div>
             </div>
           </div>
         </>

@@ -83,11 +83,11 @@ export function DataTable<TData, TValue>({
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <React.Fragment key={row.id}>
-                  <TableRow>
+                  <TableRow className="h-0">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="align-top first:cursor-pointer first:border-r"
+                        className="h-full align-top first:cursor-pointer first:border-r"
                         onClick={
                           cell.getValue() === undefined
                             ? () => row.toggleExpanded()
