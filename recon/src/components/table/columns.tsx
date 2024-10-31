@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react"
+import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 
@@ -36,13 +37,13 @@ export const columns: ColumnDef<SearchResults>[] = [
     header: ({}) => <InfoCircledIcon />,
     cell: ({ row }) => {
       return (
-        <div>
+        <>
           {row.getIsExpanded() ? (
             <ChevronDown className="h-4 w-4" />
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
-        </div>
+        </>
       )
     },
   },
@@ -84,18 +85,18 @@ export const columns: ColumnDef<SearchResults>[] = [
           <div>
             {!row.getIsExpanded() && value.length > 90
               ? value.substring(0, 90) + "..."
-              : value}
-          </div>
+                : value}
+            </div>
           <div className="mt-4 flex flex-wrap space-x-1 overflow-hidden">
-            <div>host = {row.original.host}</div>
-            <div className="before:mr-1 before:content-['|']">
-              window = {row.original.window}
-            </div>
-            <div className="before:mr-1 before:content-['|']">
-              source = {row.original.source}
-            </div>
-            <div className="before:mr-1 before:content-['|']">
-              sourcetype = {row.original.sourcetype}
+              <div>host = {row.original.host}</div>
+              <div className="before:mr-1 before:content-['|']">
+                window = {row.original.window}
+              </div>
+              <div className="before:mr-1 before:content-['|']">
+                source = {row.original.source}
+              </div>
+              <div className="before:mr-1 before:content-['|']">
+                sourcetype = {row.original.sourcetype}
             </div>
           </div>
         </>
@@ -104,6 +105,21 @@ export const columns: ColumnDef<SearchResults>[] = [
   },
   {
     accessorKey: "screenshot",
-    header: "Screenshot",
+    header: "Screenshot Preview",
+    cell: ({ row }) => {
+      const url = row.getValue("screenshot") as string
+
+      return (
+        <div className="flex justify-center">
+          <Image
+            className="rounded-lg"
+            src={url}
+            alt="Screenshot"
+            width={200} // in px
+            height={200} // in px
+          />
+        </div>
+      )
+    },
   },
 ]

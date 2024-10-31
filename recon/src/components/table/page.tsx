@@ -9,7 +9,7 @@ const generateRandomSearchResults = (): SearchResults => {
     id: faker.string.uuid(),
     time: faker.date.recent().toISOString(), // Generates a recent date as an ISO string
     string: faker.lorem.paragraphs(), // Generates a random sentence
-    screenshot: faker.image.url(), // Generates a random image URL
+    screenshot: faker.image.avatar(), // Generates a random image URL
     host: faker.hacker.adjective(), // Generates a random hostname
     window: faker.system.commonFileName(), // Generates a random Window name
     source: faker.system.directoryPath(), // Generates a random source filepath
