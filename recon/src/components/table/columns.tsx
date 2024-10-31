@@ -65,7 +65,6 @@ export const columns: ColumnDef<SearchResults>[] = [
   },
   {
     accessorKey: "string",
-    size: 650,
     header: ({ column }) => (
       <Button variant="ghost" onClick={column.getToggleSortingHandler()}>
         Strings captured
@@ -107,12 +106,13 @@ export const columns: ColumnDef<SearchResults>[] = [
   },
   {
     accessorKey: "screenshot",
+    size: 250,
     header: "Screenshot Preview",
     cell: ({ row }) => {
       const url = row.getValue("screenshot") as string
 
       return (
-        <div className="flex justify-center">
+        <div className="flex transform justify-center hover:scale-105 hover:transition-transform hover:duration-200">
           <Image
             className="rounded-lg"
             src={url}
