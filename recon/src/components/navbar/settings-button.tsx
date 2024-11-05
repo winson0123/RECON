@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function SettingsButton() {
+  const router = useRouter()
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -20,9 +23,9 @@ export default function SettingsButton() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>Add Data</DropdownMenuItem>
-        <DropdownMenuItem>Manage Data</DropdownMenuItem>
-        <DropdownMenuItem>Profile</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/data/upload')}>Add Data</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/data/manage')}>Manage Data</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

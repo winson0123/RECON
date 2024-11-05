@@ -14,7 +14,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <title> hello world </title>
+      <title> Dashboard </title>
       <body>
         <ThemeProvider
           attribute="class"
