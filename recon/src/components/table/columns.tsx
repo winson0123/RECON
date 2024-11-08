@@ -19,16 +19,23 @@ export type SearchResults = {
   time: string
   string: string
   screenshot: string
-  window: string
-  host: string
-  source: string
-  sourcetype: string
+  subResults: SubSearchResults
 }
 
 export type SubSearchResults = {
-  uploadedBy: string // New fields for expanded data
-  username: string
-  guid: string
+  host: string
+  window: string
+  source: string
+  sourcetype: string
+  uploadedBy: string
+}
+
+export const subSearchResultsMock: SubSearchResults = {
+  host: "",
+  window: "",
+  source: "",
+  sourcetype: "",
+  uploadedBy: "",
 }
 
 export const columns: ColumnDef<SearchResults>[] = [
@@ -90,19 +97,23 @@ export const columns: ColumnDef<SearchResults>[] = [
             <div className="flex flex-wrap space-x-1 overflow-hidden">
               <div className="ml-1 flex">
                 <div className="text-slate-500"> host = </div>
-                <div className="ml-1">{row.original.host}</div>
+                <div className="ml-1">{row.original.subResults.host}</div>
               </div>
               <div className="flex before:content-['|']">
                 <div className="text-slate-500 before:mr-1">window =</div>
-                <div className="ml-1">{row.original.window}</div>
+                <div className="ml-1">{row.original.subResults.window}</div>
               </div>
               <div className="flex before:content-['|']">
                 <div className="text-slate-500 before:mr-1">source = </div>
-                <div className="ml-1">{row.original.source}</div>
+                <div className="ml-1">{row.original.subResults.source}</div>
               </div>
               <div className="flex before:content-['|']">
                 <div className="text-slate-500 before:mr-1">sourcetype = </div>
-                <div className="ml-1">{row.original.sourcetype}</div>
+                <div className="ml-1">{row.original.subResults.sourcetype}</div>
+              </div>
+              <div className="flex before:content-['|']">
+                <div className="text-slate-500 before:mr-1">uploader = </div>
+                <div className="ml-1">{row.original.subResults.uploadedBy}</div>
               </div>
             </div>
           </div>
