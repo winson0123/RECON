@@ -438,7 +438,7 @@ const SidebarContent = React.forwardRef<
               <li
                 key={field}
                 onClick={() => handleDeselectField(field)}
-                className="list-item cursor-pointer text-sky-400 marker:text-primary"
+                className="list-item cursor-pointer text-blue-600 marker:text-primary dark:text-sky-400"
               >
                 {field}
               </li>
@@ -456,7 +456,7 @@ const SidebarContent = React.forwardRef<
               <li
                 key={field}
                 onClick={() => handleSelectField(field)}
-                className="list-item cursor-pointer text-sky-400 marker:text-primary"
+                className="list-item cursor-pointer text-blue-600 marker:text-primary dark:text-sky-400"
               >
                 {field}
               </li>
