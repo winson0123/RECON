@@ -6,10 +6,24 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
 
-    const file = formData.get("file") as File;
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
-    await fs.writeFile(`./tmp/uploads/${file.name}`, buffer);
+    const index = formData.get("index") as String;
+    const dbFile = formData.get("db_file") as File;
+    const ssFile = formData.get("ss_file") as File;
+    if (!index) {
+      return NextResponse.json({ status: "fail", error: "An index is required" });
+    } else if (typeof dbFile !== 'object') {
+      return NextResponse.json({ status: "fail", error: "A Database File is required" });
+    } else if (typeof ssFile!== 'object') {
+      return NextResponse.json({ status: "fail", error: "A snapshot file (zip) is required" });
+    }
+    const dbArrayBuffer = await dbFile.arrayBuffer();
+    const ssArrayBuffer = await ssFile.arrayBuffer();
+    const dbBuffer = new Uint8Array(dbArrayBuffer);
+    const ssBuffer = new Uint8Array(ssArrayBuffer);
+
+    await fs.mkdir(`./tmp/uploads/${index}/`, { recursive: true }).catch(console.error)
+    await fs.writeFile(`./tmp/uploads/${index}/${dbFile.name}`, dbBuffer);
+    await fs.writeFile(`./tmp/uploads/${index}/${ssFile.name}`, ssBuffer);
 
     revalidatePath("/");
 

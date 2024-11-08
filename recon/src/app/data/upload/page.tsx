@@ -1,14 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { useEffect, useState, useRef, useMemo } from "react"
-import formatError from "@/app/api/common/formatError"
-import { CloudUpload, File, Trash2 } from "lucide-react"
+import { useRef, useMemo } from "react"
+import { CloudUpload, File } from "lucide-react"
 import notification, { Notification } from "@/components/ui/notification"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function Upload() {
+  const indexInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
-  const [dragging, setDragging] = useState(false)
+  const fileInput2 = useRef<HTMLInputElement>(null)
   const fileDropBoxEl = useRef<HTMLDivElement>(null)
   const fileDropBoxHeight = useMemo(
     () =>
@@ -21,49 +23,15 @@ export default function Upload() {
     height: `${fileDropBoxHeight}`,
   }
 
-  // Handle file input from drag and drop
-  useEffect(() => {
-    const handleDragOver = (event: DragEvent) => {
-      event.stopPropagation()
-      event.preventDefault()
-      setDragging(true)
-    }
-    const handleDragLeave = (event: DragEvent) => {
-      event.stopPropagation()
-      event.preventDefault()
-      const dropzone = document.getElementById("dropzone")
-      if (!dropzone?.contains(event.relatedTarget as Node)) setDragging(false)
-    }
-    const onDrop = (event: DragEvent) => {
-      handleDragLeave(event)
-      if (
-        event.dataTransfer?.files &&
-        event.dataTransfer.files.length > 0 &&
-        fileInput.current
-      ) {
-        fileInput.current.files = event.dataTransfer.files
-      }
-    }
-
-    const dropzone = document.getElementById("dropzone")
-    dropzone?.addEventListener("dragover", handleDragOver)
-    dropzone?.addEventListener("dragleave", handleDragLeave)
-    dropzone?.addEventListener("drop", onDrop)
-    return () => {
-      dropzone?.removeEventListener("dragover", handleDragOver)
-      dropzone?.removeEventListener("dragleave", handleDragLeave)
-      dropzone?.removeEventListener("drop", onDrop)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   async function uploadFile(
     evt: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
     evt.preventDefault()
 
     const formData = new FormData()
-    formData.append("file", fileInput?.current?.files?.[0]!)
+    formData.append("index", indexInput?.current?.value!)
+    formData.append("db_file", fileInput?.current?.files?.[0]!)
+    formData.append("ss_file", fileInput2?.current?.files?.[0]!)
 
     const response = await fetch("/api/data/upload", {
       method: "POST",
@@ -87,33 +55,29 @@ export default function Upload() {
   }
 
   return (
-    <form
-      id="dropzone"
-      className={`m-8 w-full content-center ${
-        dragging
-          ? "rounded-3xl border border-solid bg-gray-800"
-          : "bg- rounded-3xl border-4 border-dashed border-blue-400"
-      } transition duration-300`}
-      style={fileDropBoxStyle}
-    >
+    <form className={`m-8 w-full content-center`} style={fileDropBoxStyle}>
       <div className="">
         <div className="mx-auto h-32 w-32">
           <CloudUpload className="h-32 w-32" />
         </div>
-        <div className="mx-auto w-96">
+        <div className="mx-auto w-96 py-2">
           <h1 className="align-center flex justify-center font-bold">
             Upload a file
           </h1>
         </div>
-        <div className="mx-auto max-w-64 py-8">
-          <input id="fileinput" type="file" name="file" ref={fileInput} />
-          {
-            // TODO: Add delete button
-            // fileInput?.current?.files &&
-            //   fileInput?.current?.files.length > 0 && (
-            //   <Trash2 color="#ff0000"/>
-            //   )
-          }
+        <div className="py-4">
+          <div className="mx-auto w-96 content-center px-4 py-2">
+            <Label htmlFor="picture">Index</Label>
+            <Input type="text" ref={indexInput} />
+          </div>
+          <div className="mx-auto w-96 content-center px-4 py-2">
+            <Label htmlFor="picture">DB File</Label>
+            <Input type="file" ref={fileInput} />
+          </div>
+          <div className="mx-auto w-96 content-center px-4 py-2">
+            <Label htmlFor="picture">Screenshots</Label>
+            <Input type="file" ref={fileInput2} />
+          </div>
         </div>
       </div>
       <div className="flex items-end justify-center gap-2">
