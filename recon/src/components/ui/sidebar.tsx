@@ -487,7 +487,7 @@ const SidebarContent = React.forwardRef<
       return updatedInterestingFileds
     })
     setSelectedFields((prev) => {
-      const updatedSelectedFields = [...prev, field].sort()
+      const updatedSelectedFields = [...prev, field]
       localStorage.setItem(
         SIDEBAR_SELECTED_FIELDS,
         JSON.stringify(updatedSelectedFields)
