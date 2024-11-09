@@ -21,7 +21,10 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
+const SIDEBAR_SELECTED_FIELDS = "sidebar:selectedFields"
+const SIDEBAR_INTERESTING_FIELDS = "sidebar:interestingFields"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+const SIDEBAR_COOKIE_SAME_SITE = "Strict"
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
@@ -35,6 +38,10 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  selectedFields: string[] | undefined
+  interestingFields: string[] | undefined
+  setSelectedFields: React.Dispatch<React.SetStateAction<string[]>>
+  setInterestingFields: React.Dispatch<React.SetStateAction<string[]>>
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -85,10 +92,39 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=${SIDEBAR_COOKIE_SAME_SITE}`
       },
       [setOpenProp, open]
     )
+
+    // State for fields, initialized with default values
+    const [selected, setSelectedFields] = React.useState<string[]>([])
+    const [interesting, setInterestingFields] = React.useState<string[]>([])
+
+    // Initialize fields from localStorage on client side
+    React.useEffect(() => {
+      const savedSelectedFields = localStorage.getItem(SIDEBAR_SELECTED_FIELDS)
+      const parsedSelectedFields = savedSelectedFields
+        ? JSON.parse(savedSelectedFields)
+        : []
+      const savedInterestingFields = localStorage.getItem(
+        SIDEBAR_INTERESTING_FIELDS
+      )
+      const parsedInterestingFields = savedInterestingFields
+        ? JSON.parse(savedInterestingFields)
+        : []
+
+      setSelectedFields(
+        parsedSelectedFields.length || parsedInterestingFields.length
+          ? parsedSelectedFields
+          : Object.keys(subSearchResultsMock).splice(0, 4)
+      )
+      setInterestingFields(
+        parsedInterestingFields.length || parsedSelectedFields.length
+          ? parsedInterestingFields
+          : Object.keys(subSearchResultsMock).splice(4)
+      )
+    }, [])
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
@@ -113,8 +149,6 @@ const SidebarProvider = React.forwardRef<
       return () => window.removeEventListener("keydown", handleKeyDown)
     }, [toggleSidebar])
 
-    // We add a state so that we can do data-state="expanded" or "collapsed".
-    // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
     const contextValue = React.useMemo<SidebarContext>(
@@ -126,8 +160,24 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        selectedFields: selected,
+        setSelectedFields,
+        interestingFields: interesting,
+        setInterestingFields,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [
+        state,
+        open,
+        setOpen,
+        isMobile,
+        openMobile,
+        setOpenMobile,
+        toggleSidebar,
+        selected,
+        setSelectedFields,
+        interesting,
+        setInterestingFields,
+      ]
     )
 
     return (
@@ -400,24 +450,50 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
-  const [selectedFields, setSelectedFields] = React.useState<string[]>(
-    Object.keys(subSearchResultsMock).splice(0, 4)
-  )
-  const [interestingFields, setInterestingFields] = React.useState<string[]>(
-    Object.keys(subSearchResultsMock).splice(4)
-  )
+  const {
+    selectedFields,
+    interestingFields,
+    setSelectedFields,
+    setInterestingFields,
+  } = useSidebar()
 
-  // Move field from selected back to interesting
-  const handleDeselectField = (field: string) => {
-    setSelectedFields(selectedFields.filter((f) => f !== field)) // Remove the field from selectedFields
-    setInterestingFields([...interestingFields, field]) // Add it back to interestingFields
-    interestingFields.sort()
+  const handleSelectField = (field: string) => {
+    setSelectedFields((prev) => {
+      const updatedSelectedFields = prev.filter((f) => f !== field)
+      localStorage.setItem(
+        SIDEBAR_SELECTED_FIELDS,
+        JSON.stringify(updatedSelectedFields)
+      )
+      return updatedSelectedFields
+    })
+    setInterestingFields((prev) => {
+      const updatedInterestingFileds = [...prev, field].sort()
+      localStorage.setItem(
+        SIDEBAR_INTERESTING_FIELDS,
+        JSON.stringify(updatedInterestingFileds)
+      )
+      return updatedInterestingFileds
+    })
   }
 
   // Move field from interesting to selected
-  const handleSelectField = (field: string) => {
-    setInterestingFields(interestingFields.filter((f) => f !== field)) // Remove the field from interestingFields
-    setSelectedFields([...selectedFields, field]) // Add it to selectedFields
+  const handleInterestingField = (field: string) => {
+    setInterestingFields((prev) => {
+      const updatedInterestingFileds = prev.filter((f) => f !== field)
+      localStorage.setItem(
+        SIDEBAR_INTERESTING_FIELDS,
+        JSON.stringify(updatedInterestingFileds)
+      )
+      return updatedInterestingFileds
+    })
+    setSelectedFields((prev) => {
+      const updatedSelectedFields = [...prev, field].sort()
+      localStorage.setItem(
+        SIDEBAR_SELECTED_FIELDS,
+        JSON.stringify(updatedSelectedFields)
+      )
+      return updatedSelectedFields
+    })
   }
 
   return (
@@ -432,13 +508,13 @@ const SidebarContent = React.forwardRef<
     >
       <div className="mb-2">
         <h3 className="font-mono uppercase">Selected Fields</h3>
-        <ul className="list-inside list-disc">
-          {selectedFields.length > 0 ? (
-            selectedFields.map((field) => (
+        <ul className="mt-0.5 list-inside list-disc space-y-0.5">
+          {(selectedFields ?? []).length > 0 ? (
+            (selectedFields ?? []).map((field) => (
               <li
                 key={field}
-                onClick={() => handleDeselectField(field)}
-                className="list-item cursor-pointer text-blue-600 marker:text-primary dark:text-sky-400"
+                onClick={() => handleSelectField(field)}
+                className="list-item cursor-pointer rounded-md p-0.5 text-blue-600 marker:text-primary hover:bg-sidebar-accent dark:text-sky-400"
               >
                 {field}
               </li>
@@ -450,13 +526,13 @@ const SidebarContent = React.forwardRef<
       </div>
       <div>
         <h3 className="font-mono uppercase">Interesting Fields</h3>
-        <ul className="list-inside list-disc">
-          {interestingFields.length > 0 ? (
-            interestingFields.map((field) => (
+        <ul className="mt-0.5 list-inside list-disc space-y-0.5">
+          {(interestingFields ?? []).length > 0 ? (
+            (interestingFields ?? []).map((field) => (
               <li
                 key={field}
-                onClick={() => handleSelectField(field)}
-                className="list-item cursor-pointer text-blue-600 marker:text-primary dark:text-sky-400"
+                onClick={() => handleInterestingField(field)}
+                className="list-item cursor-pointer rounded-md p-0.5 text-blue-600 marker:text-primary hover:bg-sidebar-accent dark:text-sky-400"
               >
                 {field}
               </li>
