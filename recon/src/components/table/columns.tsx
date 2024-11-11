@@ -12,6 +12,7 @@ import {
 import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
+import { useSidebar } from "@/components/ui/sidebar"
 
 // Define the shape of our data.
 export type SearchResults = {
@@ -19,16 +20,23 @@ export type SearchResults = {
   time: string
   string: string
   screenshot: string
-  window: string
-  host: string
-  source: string
-  sourcetype: string
+  subResults: SubSearchResults
 }
 
 export type SubSearchResults = {
-  uploadedBy: string // New fields for expanded data
-  username: string
-  guid: string
+  host: string
+  window: string
+  source: string
+  sourcetype: string
+  uploadedBy: string
+}
+
+export const subSearchResultsMock: SubSearchResults = {
+  host: "",
+  window: "",
+  source: "",
+  sourcetype: "",
+  uploadedBy: "",
 }
 
 export const columns: ColumnDef<SearchResults>[] = [
@@ -79,6 +87,8 @@ export const columns: ColumnDef<SearchResults>[] = [
     ),
     cell: ({ row }) => {
       const value = row.getValue("string") as string
+      const { selectedFields = [] } = useSidebar()
+
       return (
         <>
           <div className="flex h-full flex-col justify-between">
@@ -88,22 +98,22 @@ export const columns: ColumnDef<SearchResults>[] = [
                 : value}
             </div>
             <div className="flex flex-wrap space-x-1 overflow-hidden">
-              <div className="ml-1 flex">
-                <div className="text-slate-500"> host = </div>
-                <div className="ml-1">{row.original.host}</div>
-              </div>
-              <div className="flex before:content-['|']">
-                <div className="text-slate-500 before:mr-1">window =</div>
-                <div className="ml-1">{row.original.window}</div>
-              </div>
-              <div className="flex before:content-['|']">
-                <div className="text-slate-500 before:mr-1">source = </div>
-                <div className="ml-1">{row.original.source}</div>
-              </div>
-              <div className="flex before:content-['|']">
-                <div className="text-slate-500 before:mr-1">sourcetype = </div>
-                <div className="ml-1">{row.original.sourcetype}</div>
-              </div>
+              {selectedFields.map((key: string, index: number) => {
+                // Get the value corresponding to the key from subResults
+                const key_value =
+                  row.original.subResults[key as keyof SubSearchResults]
+                return (
+                  <div
+                    className={`flex ${index === 0 ? "ml-1" : "before:content-['|']"} ${
+                      index !== 0 ? "before:mr-1" : ""
+                    }`}
+                    key={key}
+                  >
+                    <div className="text-slate-500"> {key} = </div>
+                    <div className="ml-1">{key_value}</div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </>

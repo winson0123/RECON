@@ -14,7 +14,6 @@ import {
 import * as React from "react"
 
 import DataTablePagination from "./pagination"
-import RowContent from "./row-expand"
 
 import {
   Table,

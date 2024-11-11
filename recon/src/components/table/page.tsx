@@ -10,11 +10,14 @@ const generateRandomSearchResults = (): SearchResults => {
     time: faker.date.recent().toISOString(), // Generates a recent date as an ISO string
     string: faker.lorem.paragraphs() + faker.lorem.paragraphs(), // Generates a random sentence
     screenshot: faker.image.avatar(), // Generates a random image URL
-    host: faker.hacker.adjective(), // Generates a random hostname
-    window: faker.system.commonFileName(), // Generates a random Window name
-    source: faker.system.directoryPath(), // Generates a random source filepath
-    sourcetype:
-      faker.number.int() % 2 === 0 ? "Text matches" : "Visual matches", // Generates a source type, text/visual
+    subResults: {
+      host: faker.hacker.adjective(), // Generates a random hostname
+      window: faker.system.commonFileName(), // Generates a random Window name
+      source: faker.system.directoryPath(), // Generates a random source filepath
+      sourcetype:
+        faker.number.int() % 2 === 0 ? "Text matches" : "Visual matches", // Generates a source type, text/visual
+      uploadedBy: faker.person.firstName(),
+    },
   }
 }
 
