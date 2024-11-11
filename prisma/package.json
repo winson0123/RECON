@@ -1,0 +1,12 @@
+{
+    "name": "recon",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+      "@prisma/client": "^4.16.2",
+      "prisma": "^4.16.2"
+    }
+  }
