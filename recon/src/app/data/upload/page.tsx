@@ -3,11 +3,13 @@
 import * as React from "react"
 import { useRef, useMemo } from "react"
 import { CloudUpload, File } from "lucide-react"
-import notification, { Notification } from "@/components/ui/notification"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
+import { ToastAction } from "@/components/ui/toast"
 
 export default function Upload() {
+  const { toast } = useToast()
   const indexInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const fileInput2 = useRef<HTMLInputElement>(null)
@@ -27,6 +29,28 @@ export default function Upload() {
     evt: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
     evt.preventDefault()
+    if (!indexInput?.current?.value!) {
+      toast({
+        variant: "destructive",
+        title: "Error:",
+        description: "The Index field cannot be empty."
+      })
+      return
+    } else if (fileInput?.current?.files?.length == 0) {
+      toast({
+        variant: "destructive",
+        title: "Error:",
+        description: "The Database File field cannot be empty."
+      })
+      return
+    } else if (fileInput2?.current?.files?.length == 0) {
+      toast({
+        variant: "destructive",
+        title: "Error:",
+        description: "The Screenshots File field cannot be empty."
+      })
+      return
+    } 
 
     const formData = new FormData()
     formData.append("index", indexInput?.current?.value!)
@@ -38,20 +62,18 @@ export default function Upload() {
       body: formData,
     })
     const result = await response.json()
-    // TODO: toast popup on successful upload
-    // if (result.status == "success") {
-    //   console.log(result.status)
-    //   notification({
-    //     message: {
-    //       message:
-    //         'File uploaded',
-    //       notificationEmitter: 'New Upload',
-    //     },
-    //     type: Notification.Success,
-    //   })
-    //   // TODO: redirect after successful upload
-    //   // router.push('/')
-    // }
+    if (result.status == "success") {
+      toast({
+        title: "Upload:",
+        description: "The upload completed successfully"
+      })
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error:",
+        description: `Something went wrong with the upload: ${result.status}`
+      })
+    }
   }
 
   return (
@@ -75,7 +97,7 @@ export default function Upload() {
             <Input type="file" ref={fileInput} />
           </div>
           <div className="mx-auto w-96 content-center px-4 py-2">
-            <Label htmlFor="picture">Screenshots</Label>
+            <Label htmlFor="picture">Screenshots (Zip)</Label>
             <Input type="file" ref={fileInput2} />
           </div>
         </div>

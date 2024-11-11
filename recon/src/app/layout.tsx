@@ -5,6 +5,7 @@ import NavBar from "@/components/navbar/nav-bar"
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/toaster"
 
 interface RootLayoutProps {
   children: ReactNode
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
             {/* Main body */}
             {children}
+            <Toaster />
           </SidebarProvider>
 
           {/* Footer */}
