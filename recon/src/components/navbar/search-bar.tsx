@@ -1,19 +1,24 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { Search } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+
 import { Textarea } from "@/components/ui/textarea"
 
+
 export default function SearchBar() {
+  const router = useRouter()
+
   const [isFocused, setIsFocused] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (textareaRef.current) {
-      // Reset height to auto to recalculate the new height
+// Reset height to auto to recalculate the new height
       textareaRef.current.style.height = "auto"
-      // Set height to scrollHeight to adjust based on content
+// Set height to scrollHeight to adjust based on content
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [inputValue]) // Effect runs when inputValue changes
@@ -30,6 +35,7 @@ export default function SearchBar() {
       console.log("Search submitted:", inputValue)
       // TODO: Clear the input after submitting (for now)
       // TODO: Change to search via elasticsearch API queries
+      router.push(`/search?query=${encodeURIComponent(inputValue)}`, { scroll: false })
       setInputValue("")
     }
   }
@@ -42,7 +48,7 @@ export default function SearchBar() {
         }`}
       />
 
-      {/* Textarea expands with content and removes padding when focused */}
+{/* Textarea expands with content and removes padding when focused */}
       <Textarea
         className={`w-full resize-none transition-all duration-300 ease-in-out ${
           !isFocused ? "pl-10" : "pr-10" // Padding for the search icon when not focused

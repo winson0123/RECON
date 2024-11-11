@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import fs from "node:fs/promises";
 import jszip from "jszip"
@@ -6,7 +6,7 @@ import FileTypeDetector, { FileTypeResult } from 'detect-file-type-lite'
 
 const fileTypeDetector = new FileTypeDetector()
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
 
