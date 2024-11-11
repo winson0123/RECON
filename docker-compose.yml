@@ -1,0 +1,85 @@
+services:
+  recon:
+    container_name: recon
+    image: recon:dev
+    build:
+      context: .
+      dockerfile: recon/Dockerfile
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - ./recon/src:/app/recon/src
+      - ./tmp/uploads:/app/recon/uploads/
+    env_file:
+      - .env
+    networks:
+      - recon
+
+  database:
+    container_name: recon_db
+    image: docker.io/library/postgres:latest
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - database_dev:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - recon
+
+  elasticsearch:
+    container_name: recon_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail http://localhost:9200/_cluster/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    environment:
+      - node.name=elasticsearch1
+      - cluster.name=recon
+      - cluster.initial_master_nodes=recon1
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_HEAP_SIZE=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+    volumes:
+      - searchindex_dev:/usr/share/elasticsearch/data
+    networks:
+      - recon
+
+  prisma:
+    container_name: recon_prisma
+    image: recon_prisma:dev
+    build:
+      context: .
+      dockerfile: prisma/Dockerfile
+    restart: unless-stopped
+    command: pnpm exec prisma studio dev
+    env_file:
+      - .env
+    ports:
+      - 5555:5555
+    volumes:
+      - ./prisma/migrations:/app/prisma/migrations
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - recon
+
+volumes:
+  database_dev:
+  searchindex_dev:
+networks:
+  recon:
+    name: recon
