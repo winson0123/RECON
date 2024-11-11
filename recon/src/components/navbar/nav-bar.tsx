@@ -1,5 +1,5 @@
-import SearchBar from "./search-bar"
 import ModeToggle from "./mode-toggle"
+import SearchBar from "./search-bar"
 import SettingsButton from "./settings-button"
 
 export default function NavBar() {
@@ -12,7 +12,7 @@ export default function NavBar() {
       <div className="justify-content-end">
         <ModeToggle />
       </div>
-      <div className="pl-2 justify-content-end">
+      <div className="justify-content-end pl-2">
         <SettingsButton />
       </div>
     </nav>

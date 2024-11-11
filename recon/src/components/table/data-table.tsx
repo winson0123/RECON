@@ -13,8 +13,6 @@ import {
 } from "@tanstack/react-table"
 import * as React from "react"
 
-import DataTablePagination from "./pagination"
-
 import {
   Table,
   TableBody,
@@ -23,6 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
+import DataTablePagination from "./pagination"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]

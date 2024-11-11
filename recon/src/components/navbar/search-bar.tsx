@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
 import { Search } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+
 import { Textarea } from "@/components/ui/textarea"
 
 export default function SearchBar() {
