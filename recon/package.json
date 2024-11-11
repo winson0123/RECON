@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --pretty --noEmit --project tsconfig.json",
+    "format": "prettier --ignore-path ../.gitignore --write . && pnpm lint --fix"
   },
   "dependencies": {
     "@faker-js/faker": "^9.1.0",
