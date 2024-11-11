@@ -5,7 +5,8 @@ import { ReactNode } from "react"
 import NavBar from "@/components/navbar/nav-bar"
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/toaster"
 
 interface RootLayoutProps {
   children: ReactNode
@@ -18,7 +19,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <title> hello world </title>
+      <title> Dashboard </title>
       <body>
         <ThemeProvider
           attribute="class"
@@ -34,6 +35,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
             {/* Main body */}
             {children}
+            <Toaster />
           </SidebarProvider>
 
           {/* Footer */}
