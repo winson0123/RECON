@@ -1,6 +1,9 @@
 import "../styles/globals.css"
 import { cookies } from "next/headers"
 import { ReactNode } from "react"
+import { Provider } from 'react-redux'
+
+import StoreProvider from "./storeProvider"
 
 import NavBar from "@/components/navbar/nav-bar"
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
@@ -17,6 +20,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true"
 
   return (
+    <StoreProvider>
     <html lang="en" suppressHydrationWarning>
       <head />
       <title> Dashboard </title>
@@ -41,6 +45,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           {/* Footer */}
         </ThemeProvider>
       </body>
-    </html>
+    </html></StoreProvider>
   )
 }
