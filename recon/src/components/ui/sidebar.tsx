@@ -71,14 +71,19 @@ const SidebarProvider = React.forwardRef<
     },
     ref
   ) => {
-    const savedState = localStorage.getItem(SIDEBAR_STATE_NAME)
-    const parsedState = savedState ? JSON.parse(savedState) : true
+    const [_open, _setOpen] = React.useState(true)
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
+    React.useEffect(() => {
+      const state = localStorage?.getItem(SIDEBAR_STATE_NAME)
+      if (state) {
+        _setOpen(JSON.parse(state))
+      }
+    }, [])
+
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
-    const [_open, _setOpen] = React.useState(parsedState)
     const open = openProp ?? _open
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
