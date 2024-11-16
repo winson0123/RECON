@@ -1,8 +1,9 @@
 "use client"
 
+import { CloudUpload, File } from "lucide-react"
 import * as React from "react"
 import { useRef, useMemo } from "react"
-import { CloudUpload, File } from "lucide-react"
+
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
@@ -32,24 +33,24 @@ export default function Upload() {
       toast({
         variant: "destructive",
         title: "Error:",
-        description: "The Index field cannot be empty."
+        description: "The Index field cannot be empty.",
       })
       return
     } else if (fileInput?.current?.files?.length == 0) {
       toast({
         variant: "destructive",
         title: "Error:",
-        description: "The Database File field cannot be empty."
+        description: "The Database File field cannot be empty.",
       })
       return
     } else if (fileInput2?.current?.files?.length == 0) {
       toast({
         variant: "destructive",
         title: "Error:",
-        description: "The Screenshots File field cannot be empty."
+        description: "The Screenshots File field cannot be empty.",
       })
       return
-    } 
+    }
 
     const formData = new FormData()
     formData.append("index", indexInput?.current?.value!)
@@ -64,13 +65,13 @@ export default function Upload() {
     if (result.status == "success") {
       toast({
         title: "Upload:",
-        description: "The upload completed successfully"
+        description: "The upload completed successfully",
       })
     } else {
       toast({
         variant: "destructive",
         title: "Error:",
-        description: `Something went wrong with the upload: ${result.error}`
+        description: `Something went wrong with the upload: ${result.error}`,
       })
     }
   }
@@ -97,7 +98,11 @@ export default function Upload() {
           </div>
           <div className="mx-auto w-96 content-center px-4 py-2">
             <Label htmlFor="picture">Screenshots (Zip)</Label>
-            <Input type="file" ref={fileInput2} accept="application/x-zip-compressed" />
+            <Input
+              type="file"
+              ref={fileInput2}
+              accept="application/x-zip-compressed"
+            />
           </div>
         </div>
       </div>
