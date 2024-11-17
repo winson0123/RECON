@@ -1,7 +1,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types'
 import { NextRequest, NextResponse } from 'next/server'
 
-import elasticController from '@/backend/elastic'
+import elasticClient from '@/backend/elastic'
 import searchFields from '@/features/search/searchFields'
 import { ElasticResult } from '@/features/search/searchSlice'
 
@@ -52,7 +52,6 @@ export async function GET(req:NextRequest) {
 
     try {
       if (!process.env.ELASTIC_BASEURL) throw new Error("Invalid ELASTIC_BASEURL environment variable")
-      const elasticClient = await elasticController.getElasticClient(process.env.ELASTIC_BASEURL)
         const { hits } = await elasticClient.search<ElasticResponse>({
         index: 'submission',
         query: searchQuery,
