@@ -1,8 +1,11 @@
+import { PrismaClient } from "@prisma/client"
 import FileTypeDetector from "detect-file-type-lite"
 import jszip from "jszip"
 import { NextRequest, NextResponse } from "next/server"
 import fs from "node:fs/promises"
 import sqlite3 from "sqlite3"
+
+import prisma from "@/backend/prisma"
 
 const fileTypeDetector = new FileTypeDetector()
 
