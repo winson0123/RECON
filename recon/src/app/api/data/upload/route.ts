@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client"
 import FileTypeDetector from "detect-file-type-lite"
 import jszip from "jszip"
 import { NextRequest, NextResponse } from "next/server"
@@ -13,10 +12,10 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
 
-    const index = formData.get("index") as String
+    const indexName = formData.get("index_name") as string
     const dbFile = formData.get("db_file") as File
     const ssFile = formData.get("ss_file") as File
-    if (!index) {
+    if (!indexName) {
       return NextResponse.json({
         status: "fail",
         error: "An index is required",
@@ -32,6 +31,18 @@ export async function POST(req: NextRequest) {
         error: "A snapshot file (zip) is required",
       })
     }
+
+    // Check if index already exists
+    let recallIndexName = await prisma.recallIndex.findUnique({
+      where: { indexName },
+    })
+    if (recallIndexName) {
+      return NextResponse.json({
+        status: "fail",
+        error: "Index name already exists",
+      })
+    }
+
     const dbArrayBuffer = await dbFile.arrayBuffer()
     const ssArrayBuffer = await ssFile.arrayBuffer()
     const dbBuffer = new Uint8Array(dbArrayBuffer)
@@ -56,14 +67,14 @@ export async function POST(req: NextRequest) {
     }
 
     await fs
-      .mkdir(`./tmp/uploads/${index}/screenshots`, { recursive: true })
+      .mkdir(`./tmp/uploads/${indexName}/screenshots`, { recursive: true })
       .catch(console.error)
-    await fs.writeFile(`./tmp/uploads/${index}/${dbFile.name}`, dbBuffer)
+    await fs.writeFile(`./tmp/uploads/${indexName}/${dbFile.name}`, dbBuffer)
     await jszip.loadAsync(ssArrayBuffer).then((zip) => {
       Object.keys(zip.files).forEach((filename) => {
         zip.files[filename].async("string").then((fileData) => {
           fs.writeFile(
-            `./tmp/uploads/${index}/screenshots/${filename}`,
+            `./tmp/uploads/${indexName}/screenshots/${filename}`,
             fileData
           )
         })
@@ -72,7 +83,10 @@ export async function POST(req: NextRequest) {
 
     // Processing the valuable information from the ukg.db database file
     // and storing it in postgres, then indexing to elasticsearch.
-    const jsonDump = await dumpDatabase(`./tmp/uploads/${index}/${dbFile.name}`)
+    const databaseDump = await dumpDatabase(
+      `./tmp/uploads/${indexName}/${dbFile.name}`
+    )
+    await insertPrisma(indexName, databaseDump)
 
     return NextResponse.json({ status: "success" })
   } catch (e) {
@@ -81,9 +95,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function dumpDatabase(dbPath: string): Promise<string> {
-  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY)
-
+async function dumpDatabase(dbPath: string) {
   // Promisify database operations
   const runQuery = (query: string): Promise<any[]> =>
     new Promise((resolve, reject) => {
@@ -93,37 +105,46 @@ async function dumpDatabase(dbPath: string): Promise<string> {
       })
     })
 
+  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY)
+
   try {
     // Dump important information from database
     const query = `
       SELECT 
-        wc.TimeStamp AS TimeStamp, 
-        wc.ImageToken AS ImageToken, 
-        app.Name AS AppName, 
-        wc.WindowTitle AS WindowTitle, 
-        wctic.c2 AS Strings, 
-        app.WindowsAppId AS WindowsAppId, 
-        wc.FallbackUri AS FallbackUri, 
-        app.Path AS Path
+          wc.TimeStamp AS TimeStamp, 
+          wc.ImageToken AS ImageToken, 
+          app.Name AS AppName, 
+          wc.WindowTitle AS WindowTitle, 
+          wctic.c2 AS Strings, 
+          app.WindowsAppId AS WindowsAppId, 
+          wc.FallbackUri AS FallbackUri, 
+          app.Path AS Path
       FROM
-        WindowCapture wc
+          WindowCapture wc
       LEFT JOIN
-          WindowCaptureTextIndex_content wctic ON wc.Id = wctic.c0
+          (
+          SELECT DISTINCT
+              ca.c0 AS c0, 
+              cb.c2 AS c2
+          FROM 
+              WindowCaptureTextIndex_content ca
+          LEFT JOIN 
+              WindowCaptureTextIndex_content cb 
+          ON 
+              ca.c0 = cb.c0
+          WHERE 
+              ca.c1 IS NOT NULL AND cb.c2 IS NOT NULL
+          ) wctic ON wc.Id = wctic.c0
       LEFT JOIN
           WindowCaptureAppRelation wcar ON wc.Id = wcar.WindowCaptureId
       LEFT JOIN
           App app ON wcar.AppId = app.Id
-      WHERE wc.ImageToken IS NOT NULL;
+      WHERE 
+          wc.ImageToken IS NOT NULL;
     `
     const rowResults = await runQuery(query)
 
-    // Convert rows to JSON
-    const jsonDump = JSON.stringify(rowResults, null, 2)
-
-    console.log("JSON Dump:")
-    console.log(jsonDump)
-
-    return jsonDump // Return the JSON-formatted string
+    return rowResults // Return the important information
   } catch (e) {
     console.error("Error dumping database:", e)
     throw e // Rethrow the error for caller to handle
@@ -135,6 +156,32 @@ async function dumpDatabase(dbPath: string): Promise<string> {
       } else {
         console.log("Database connection closed.")
       }
+    })
+  }
+}
+
+async function insertPrisma(indexName: string, rowResults: any[]) {
+  // Create a new RecallIndex
+  const recallIndex = await prisma.recallIndex.create({
+    data: { indexName },
+  })
+
+  // Insert rows into Prisma's Capture model
+  for (const row of rowResults) {
+    await prisma.capture.create({
+      data: {
+        timestamp: new Date(row.TimeStamp), // Ensure valid Date conversion
+        imageToken: row.ImageToken,
+        appName: row.AppName,
+        windowTitle: row.WindowTitle,
+        strings: row.Strings || null,
+        windowsAppId: row.WindowsAppId,
+        fallbackUri: row.FallbackUri || null,
+        path: row.Path,
+        recallIndex: {
+          connect: { indexId: recallIndex.indexId }, // Link to the existing RecallIndex
+        },
+      },
     })
   }
 }

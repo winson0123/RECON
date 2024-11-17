@@ -33,7 +33,7 @@ export default function Upload() {
       toast({
         variant: "destructive",
         title: "Error:",
-        description: "The Index field cannot be empty.",
+        description: "The Index name field cannot be empty.",
       })
       return
     } else if (fileInput?.current?.files?.length == 0) {
@@ -53,7 +53,7 @@ export default function Upload() {
     }
 
     const formData = new FormData()
-    formData.append("index", indexInput?.current?.value!)
+    formData.append("index_name", indexInput?.current?.value!)
     formData.append("db_file", fileInput?.current?.files?.[0]!)
     formData.append("ss_file", fileInput2?.current?.files?.[0]!)
 
@@ -89,7 +89,7 @@ export default function Upload() {
         </div>
         <div className="py-4">
           <div className="mx-auto w-96 content-center px-4 py-2">
-            <Label htmlFor="picture">Index</Label>
+            <Label htmlFor="picture">Index Name</Label>
             <Input type="text" ref={indexInput} />
           </div>
           <div className="mx-auto w-96 content-center px-4 py-2">
