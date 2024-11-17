@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 import fs from "node:fs/promises"
 import sqlite3 from "sqlite3"
 
+import elasticClient from "@/backend/elastic"
 import prisma from "@/backend/prisma"
 
 const fileTypeDetector = new FileTypeDetector()
@@ -33,10 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if index already exists
-    let recallIndexName = await prisma.recallIndex.findUnique({
-      where: { indexName },
-    })
-    if (recallIndexName) {
+    if (await prisma.recallIndex.findUnique({ where: { indexName } })) {
       return NextResponse.json({
         status: "fail",
         error: "Index name already exists",
@@ -87,6 +85,7 @@ export async function POST(req: NextRequest) {
       `./tmp/uploads/${indexName}/${dbFile.name}`
     )
     await insertPrisma(indexName, databaseDump)
+    await indexDataToElasticsearch(indexName, databaseDump)
 
     return NextResponse.json({ status: "success" })
   } catch (e) {
@@ -143,6 +142,7 @@ async function dumpDatabase(dbPath: string) {
           wc.ImageToken IS NOT NULL;
     `
     const rowResults = await runQuery(query)
+    console.log("Database dump successful")
 
     return rowResults // Return the important information
   } catch (e) {
@@ -151,11 +151,7 @@ async function dumpDatabase(dbPath: string) {
   } finally {
     // Close the database connection
     db.close((err) => {
-      if (err) {
-        console.error("Error closing database:", err.message)
-      } else {
-        console.log("Database connection closed.")
-      }
+      if (err) console.error("Error closing database:", err.message)
     })
   }
 }
@@ -183,5 +179,33 @@ async function insertPrisma(indexName: string, rowResults: any[]) {
         },
       },
     })
+  }
+  console.log("Database dump inserted into Prisma")
+}
+
+// Index data into Elasticsearch
+async function indexDataToElasticsearch(indexName: string, rowResults: any[]) {
+  try {
+    // Prepare the bulk data for Elasticsearch
+    const body = rowResults.flatMap((doc) => [
+      { index: { _index: indexName } },
+      {
+        timestamp: doc.TimeStamp,
+        imageToken: doc.ImageToken,
+        appName: doc.AppName,
+        windowTitle: doc.WindowTitle,
+        strings: doc.Strings || null,
+        windowsAppId: doc.WindowsAppId,
+        fallbackUri: doc.FallbackUri || null,
+        path: doc.Path,
+      },
+    ])
+
+    // Bulk index data
+    await elasticClient.bulk({ refresh: true, body })
+    console.log("Database dump indexed into Elasticsearch")
+  } catch (e) {
+    console.error("Error indexing data into Elasticsearch:", e)
+    throw e
   }
 }
