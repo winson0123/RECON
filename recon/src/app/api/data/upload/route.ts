@@ -2,6 +2,7 @@ import FileTypeDetector from "detect-file-type-lite"
 import jszip from "jszip"
 import { NextRequest, NextResponse } from "next/server"
 import fs from "node:fs/promises"
+import sqlite3 from "sqlite3"
 
 const fileTypeDetector = new FileTypeDetector()
 
@@ -66,9 +67,71 @@ export async function POST(req: NextRequest) {
       })
     })
 
+    // Processing the valuable information from the ukg.db database file
+    // and storing it in postgres, then indexing to elasticsearch.
+    const jsonDump = await dumpDatabase(`./tmp/uploads/${index}/${dbFile.name}`)
+
     return NextResponse.json({ status: "success" })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ status: "fail", error: e })
+  }
+}
+
+async function dumpDatabase(dbPath: string): Promise<string> {
+  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY)
+
+  // Promisify database operations
+  const runQuery = (query: string): Promise<any[]> =>
+    new Promise((resolve, reject) => {
+      db.all(query, (err, rows) => {
+        if (err) reject(err)
+        else resolve(rows)
+      })
+    })
+
+  try {
+    // Dump important information from database
+    const query = `
+      SELECT 
+        wc.TimeStamp AS TimeStamp, 
+        wc.ImageToken AS ImageToken, 
+        app.Name AS AppName, 
+        wc.WindowTitle AS WindowTitle, 
+        wctic.c2 AS Strings, 
+        app.WindowsAppId AS WindowsAppId, 
+        wc.FallbackUri AS FallbackUri, 
+        app.Path AS Path
+      FROM
+        WindowCapture wc
+      LEFT JOIN
+          WindowCaptureTextIndex_content wctic ON wc.Id = wctic.c0
+      LEFT JOIN
+          WindowCaptureAppRelation wcar ON wc.Id = wcar.WindowCaptureId
+      LEFT JOIN
+          App app ON wcar.AppId = app.Id
+      WHERE wc.ImageToken IS NOT NULL;
+    `
+    const rowResults = await runQuery(query)
+
+    // Convert rows to JSON
+    const jsonDump = JSON.stringify(rowResults, null, 2)
+
+    console.log("JSON Dump:")
+    console.log(jsonDump)
+
+    return jsonDump // Return the JSON-formatted string
+  } catch (e) {
+    console.error("Error dumping database:", e)
+    throw e // Rethrow the error for caller to handle
+  } finally {
+    // Close the database connection
+    db.close((err) => {
+      if (err) {
+        console.error("Error closing database:", err.message)
+      } else {
+        console.log("Database connection closed.")
+      }
+    })
   }
 }
