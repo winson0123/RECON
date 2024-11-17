@@ -1,14 +1,14 @@
 -- CreateTable
 CREATE TABLE "RecallIndex" (
-    "id" SERIAL NOT NULL,
+    "indexId" SERIAL NOT NULL,
     "indexName" TEXT NOT NULL,
 
-    CONSTRAINT "RecallIndex_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "RecallIndex_pkey" PRIMARY KEY ("indexId")
 );
 
 -- CreateTable
 CREATE TABLE "Capture" (
-    "id" SERIAL NOT NULL,
+    "captureId" SERIAL NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL,
     "imageToken" TEXT NOT NULL,
     "appName" TEXT NOT NULL,
@@ -19,11 +19,11 @@ CREATE TABLE "Capture" (
     "path" TEXT NOT NULL,
     "indexId" INTEGER NOT NULL,
 
-    CONSTRAINT "Capture_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Capture_pkey" PRIMARY KEY ("captureId")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RecallIndex_indexName_key" ON "RecallIndex"("indexName");
 
 -- AddForeignKey
-ALTER TABLE "Capture" ADD CONSTRAINT "Capture_indexId_fkey" FOREIGN KEY ("indexId") REFERENCES "RecallIndex"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Capture" ADD CONSTRAINT "Capture_indexId_fkey" FOREIGN KEY ("indexId") REFERENCES "RecallIndex"("indexId") ON DELETE CASCADE ON UPDATE CASCADE;

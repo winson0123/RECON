@@ -9,13 +9,13 @@ generator client {
 }
 
 model RecallIndex {
-  id        Int         @id @default(autoincrement())
+  indexId   Int         @id @default(autoincrement())
   indexName String      @unique
   captures  Capture[]
 }
 
 model Capture {
-  id            Int       @id @default(autoincrement())
+  captureId     Int         @id @default(autoincrement())
   timestamp     DateTime
   imageToken    String
   appName       String
@@ -25,5 +25,5 @@ model Capture {
   fallbackUri   String?
   path          String
   indexId       Int
-  recallIndex   RecallIndex @relation(fields: [indexId], references: [id], onDelete: Cascade)
+  recallIndex   RecallIndex @relation(fields: [indexId], references: [indexId], onDelete: Cascade)
 }
