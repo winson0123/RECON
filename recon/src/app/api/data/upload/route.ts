@@ -65,14 +65,14 @@ export async function POST(req: NextRequest) {
     }
 
     await fs
-      .mkdir(`./tmp/uploads/${indexName}/screenshots`, { recursive: true })
+      .mkdir(`./uploads/${indexName}/screenshots`, { recursive: true })
       .catch(console.error)
-    await fs.writeFile(`./tmp/uploads/${indexName}/${dbFile.name}`, dbBuffer)
+    await fs.writeFile(`./uploads/${indexName}/${dbFile.name}`, dbBuffer)
     await jszip.loadAsync(ssArrayBuffer).then((zip) => {
       Object.keys(zip.files).forEach((filename) => {
         zip.files[filename].async("string").then((fileData) => {
           fs.writeFile(
-            `./tmp/uploads/${indexName}/screenshots/${filename}`,
+            `./uploads/${indexName}/screenshots/${filename}`,
             fileData
           )
         })
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     // Processing the valuable information from the ukg.db database file
     // and storing it in postgres, then indexing to elasticsearch.
     const databaseDump = await dumpDatabase(
-      `./tmp/uploads/${indexName}/${dbFile.name}`
+      `./uploads/${indexName}/${dbFile.name}`
     )
     await insertPrisma(indexName, databaseDump)
     await indexDataToElasticsearch(indexName, databaseDump)
