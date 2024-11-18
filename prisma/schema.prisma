@@ -8,85 +8,22 @@ generator client {
     binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
-model App {
-    Id           Int     @id
-    WindowsAppId String
-    IconUri      String?
-    Name         String
-    Path         String
-    Properties   String?
+model RecallIndex {
+  indexId   Int         @id @default(autoincrement())
+  indexName String      @unique
+  captures  Capture[]
 }
 
-model AppDwellTime {
-    Id                 Int    @id
-    WindowsAppId       String
-    HourOfDay          Int
-    DayOfWeek          Int
-    HourStartTimeStamp Int
-    DwellTime          Int
+model Capture {
+  captureId     Int         @id @default(autoincrement())
+  timestamp     DateTime
+  imageToken    String
+  appName       String
+  windowTitle   String
+  strings       String?
+  windowsAppId  String
+  fallbackUri   String?
+  path          String
+  indexId       Int
+  recallIndex   RecallIndex @relation(fields: [indexId], references: [indexId], onDelete: Cascade)
 }
-
-model File {
-    Id         Int    @id
-    Path       String
-    Name       String
-    Extension  String
-    Kind       String
-    Type       String
-    Properties String
-    ObjectId   String
-    VolumeId   String
-}
-
-model IdTable {
-    NextId Int @id
-}
-
-// model ScreenRegion {
-//     Id               Int            @id
-//     WindowCapturedId WindowCapture? @relation(fields: [WindowCaptureId], references: [Id])
-//     RegionKind       Int
-//     OcrText          String?
-//     Bounds           String
-//     WindowCaptureId Int
-// }
-
-model Topic {
-    Id         Int     @id
-    Title      String
-    Properties String?
-}
-
-model Web {
-    Id         Int     @id
-    Domain     String
-    Uri        String
-    IconUri    String?
-    Properties String?
-}
-
-model WebDomainDwellTime {
-    Id                 Int    @id
-    Domain             String
-    HourOfDay          Int
-    DayOfWeek          Int
-    HourStartTimeStamp Int
-    DwellTime          Int
-}
-
-// model WindowCapture {
-//     Id           Int            @id
-//     Name         String
-//     ImageToken   String?
-//     IsForeground    Int?
-//     WindowId    Int?
-//     WindowBounds   String?
-//     WindowTitle String?
-//     Properties  String?
-//     TimeStamp   Int?
-//     IsProcessed Int?
-//     ActivationUri   String?
-//     ActivityId  Int?
-//     FallbackUri String?
-//     ScreenRegion    ScreenRegion
-// }
