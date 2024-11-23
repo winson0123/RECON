@@ -12,13 +12,13 @@ To deploy the project successfully, please ensure the following prerequisits are
 
 1. Model and Processor Directories
    - The following folders must be present in the directory path `RECON/model/api`:
-     - `blip_model`: This folder should contain the pretrained model files, including `model.safetensors`, along with the necessary configuration files like `config.json` and `generation_config.json`.
-     - `blip_processor`: This folder should contain the processor files required for input preprocessing, such as `preprocessor_config.json`, `special_tokens_map.json`, `tokenizer_config.json`, `tokenizer.json`, and `vocab.txt`.
+     - `blip_model`: This folder should contain the pretrained model files like `model.safetensors`, along with the necessary configuration files like `config.json` and `generation_config.json`.
+     - `blip_processor`: This folder should contain the processor files required for input preprocessing like `preprocessor_config.json`, `special_tokens_map.json`, `tokenizer_config.json`, `tokenizer.json`, and `vocab.txt`.
 2. Docker Setup:
    - Ensure that you have Docker installed and properly configured on your system
    - Before running the application, ensure the required model and processor folders are correctly placed as outlined above.
 3. Running the Application:
-   - Navigate to the project Root directory where the `docker-compose.yml` file is locared.
+   - Navigate to the project Root directory where the `docker-compose.yml` file is located.
    - Execute the following command to build and start the Docker container:
      ```
      docker-compose up -d
