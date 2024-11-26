@@ -1,37 +1,40 @@
-import { faker } from "@faker-js/faker"
+"use client"
 
-import { SearchResults, columns } from "./columns"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+
+import { columns } from "./columns"
 import { DataTable } from "./data-table"
 
-// Function to generate random search results
-const generateRandomSearchResults = (): SearchResults => {
-  return {
-    id: faker.string.uuid(),
-    time: faker.date.recent().toISOString(), // Generates a recent date as an ISO string
-    string: faker.lorem.paragraphs() + faker.lorem.paragraphs(), // Generates a random sentence
-    screenshot: faker.image.avatar(), // Generates a random image URL
-    subResults: {
-      host: faker.hacker.adjective(), // Generates a random hostname
-      window: faker.system.commonFileName(), // Generates a random Window name
-      source: faker.system.directoryPath(), // Generates a random source filepath
-      sourcetype:
-        faker.number.int() % 2 === 0 ? "Text matches" : "Visual matches", // Generates a source type, text/visual
-      uploadedBy: faker.person.firstName(),
-    },
+import { useSearchElasticQuery } from "@/features/search/searchSlice"
+
+export default function DemoPage() {
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState<string>("")
+
+  useEffect(() => {
+    const queryParam = searchParams.get("query")
+    setQuery(queryParam ?? "")
+  }, [searchParams])
+
+  // Load everything onto client side for easier pagination and sorting.
+  // Future enhancement: Server-side pagination and sorting, only required if search result set is too big which is unlikely at this stage.
+  const { data, isLoading, isFetching, isError } = useSearchElasticQuery({
+    query,
+  })
+
+  if (isLoading || isFetching) return <p className="text-center">Loading...</p>
+
+  if (isError) {
+    return <p className="text-center">Something went wrong</p>
   }
-}
 
-async function getData(): Promise<SearchResults[]> {
-  // Fetch data from your API here.
-  return faker.helpers.multiple(generateRandomSearchResults, { count: 15 })
-}
-
-export default async function DemoPage() {
-  const data = await getData()
+  if (!data?.results?.length)
+    return <p className="text-center">No matching submissions found</p>
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data} />
+      <DataTable columns={columns} data={data.results} />
     </div>
   )
 }

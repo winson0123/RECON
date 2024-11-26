@@ -2,25 +2,30 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types'
 import { NextRequest, NextResponse } from 'next/server'
 
 import elasticClient from '@/backend/elastic'
+import { SearchResults } from '@/components/table/columns'
 import searchFields from '@/features/search/searchFields'
-import { ElasticResult } from '@/features/search/searchSlice'
 
 export interface ElasticResponse {
-  filename: string
-  highlight: Record<string, string[]>
+  timestamp: number
+  imageToken: string
+  appName: string
+  windowTitle: string
+  strings: string
+  windowsAppId: string
+  fallbackUri: string
+  path: string
 }
 
 export async function GET(req:NextRequest) {
     const searchParams = req.nextUrl.searchParams
     // TODO: Escape special characters in query
     let query = searchParams.get('query') || ''
-    let from = searchParams.get('from') ? Number(searchParams.get('from')) : 0
     let fields = searchParams.getAll('fields') || []
     let dateStart = searchParams.get('dateStart')
     let dateEnd = searchParams.get('dateEnd')
 
     const createdAtRange = {
-      createdAt: {
+      timestamp: {
         time_zone: '+08:00',
         gte: dateStart || undefined,
         lte: dateEnd || undefined,
@@ -53,29 +58,30 @@ export async function GET(req:NextRequest) {
     try {
       if (!process.env.ELASTIC_BASEURL) throw new Error("Invalid ELASTIC_BASEURL environment variable")
         const { hits } = await elasticClient.search<ElasticResponse>({
-        index: 'submission',
-        query: searchQuery,
-        size: 10,
-        highlight: {
-          encoder: 'html',
-          pre_tags: ['<span class="font-bold">'],
-          post_tags: ['</span>'],
-          fields: {
-            '*': {
-              highlight_query: searchQuery,
-            },
-          },
-        },
-        from,
-        rest_total_hits_as_int: true,
-        // sort: [{ 'metadata.createdAt': { order: 'desc' } }],
-      })
+          index: '*',
+          query: searchQuery,
+          size: 10000,
+          rest_total_hits_as_int: true,
+          // sort: [{ 'timestamp': { order: 'desc' } }],
+        })
 
       /* eslint-disable no-underscore-dangle */
-      const results: ElasticResult[] = hits.hits.map((hit) => ({
-        id: hit._id,
-        filename: hit._source!.filename,
-        highlight: hit.highlight,
+      const results: SearchResults[] = hits.hits.map((hit) => ({
+        id: hit._id!,
+        time: hit._source!.timestamp,
+        string: hit._source!.strings,
+        screenshot: `./uploads/${hit._index}/screenshots/${hit._source!.imageToken}`,
+        subResults:{
+          index: hit._index,
+          host: hit._index,
+          window: hit._source!.windowTitle,
+          source: hit._index,
+          sourcetype: "Text matches",
+          appName: hit._source!.appName,
+          windowsAppId: hit._source!.windowsAppId,
+          fallbackUri: hit._source!.fallbackUri,
+          path: hit._source!.path,
+        }
       }))
 
       return NextResponse.json({ results, resultSize: hits.total })

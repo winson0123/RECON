@@ -35,7 +35,7 @@ export default function SearchBar() {
       console.log("Search submitted:", inputValue)
       // TODO: Clear the input after submitting (for now)
       // TODO: Change to search via elasticsearch API queries
-      router.push(`/search?query=${encodeURIComponent(inputValue)}`, { scroll: false })
+      router.push(`/?query=${encodeURIComponent(inputValue)}`, { scroll: false })
       setInputValue("")
     }
   }

@@ -9,7 +9,8 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react"
-import Image from "next/image"
+
+import Screenshot from "./screenshot"
 
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
@@ -17,26 +18,34 @@ import { useSidebar } from "@/components/ui/sidebar"
 // Define the shape of our data.
 export type SearchResults = {
   id: string
-  time: string
+  time: number
   string: string
   screenshot: string
   subResults: SubSearchResults
 }
 
 export type SubSearchResults = {
+  index: string
   host: string
   window: string
   source: string
   sourcetype: string
-  uploadedBy: string
+  appName: string
+  windowsAppId: string
+  fallbackUri: string | null
+  path: string
 }
 
 export const subSearchResultsMock: SubSearchResults = {
+  index: "",
   host: "",
   window: "",
   source: "",
   sourcetype: "",
-  uploadedBy: "",
+  appName: "",
+  windowsAppId: "",
+  fallbackUri: "",
+  path: ""
 }
 
 export const columns: ColumnDef<SearchResults>[] = [
@@ -70,6 +79,11 @@ export const columns: ColumnDef<SearchResults>[] = [
         )}
       </Button>
     ),
+    cell: ({ row }) => {
+      const timestamp = row.getValue("time") as number
+      const date = new Date(timestamp)
+      return date.toLocaleString()
+    },
   },
   {
     accessorKey: "string",
@@ -125,19 +139,8 @@ export const columns: ColumnDef<SearchResults>[] = [
     size: 250,
     header: "Screenshot Preview",
     cell: ({ row }) => {
-      const url = row.getValue("screenshot") as string
-
-      return (
-        <div className="flex transform justify-center hover:scale-105 hover:transition-transform hover:duration-200">
-          <Image
-            className="rounded-lg"
-            src={url}
-            alt="Screenshot"
-            width={200} // in px
-            height={200} // in px
-          />
-        </div>
-      )
+      const path = row.getValue("screenshot") as string
+      return <Screenshot filePath={path}/>
     },
   },
 ]
