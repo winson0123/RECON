@@ -1,8 +1,11 @@
 from transformers import BlipProcessor, BlipForQuestionAnswering
-from PIL import Image
-from fastapi import FastAPI
-import json
+from PIL import Image, UnidentifiedImageError
+from fastapi import FastAPI, HTTPException
 import os
+import logging
+
+# Configure the logger
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="ML Engine",
@@ -11,69 +14,113 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# Obtain the base dir of the current file path
-base_dir = os.path.dirname(os.path.abspath(__file__))
+# Paths and constants
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_DIRECTORY = os.path.abspath(os.path.join(BASE_DIR, "..", "uploads"))
+PROCESSOR_PATH = os.path.join(BASE_DIR, "blip_processor")
+MODEL_PATH = os.path.join(BASE_DIR, "blip_model")
 
-# Predefined Directory Path
-INDEX_DIRECTORY = os.path.join(base_dir, "..", "uploads")
-
-# Processor and model directory
-processor_path = os.path.join(base_dir, "blip_processor")
-model_path = os.path.join(base_dir, "blip_model")
-
-# Load processor and model locally
-processor = BlipProcessor.from_pretrained(processor_path)
-model = BlipForQuestionAnswering.from_pretrained(model_path)
+# Load BLIP processor and model
+try:
+    processor = BlipProcessor.from_pretrained(PROCESSOR_PATH)
+    model = BlipForQuestionAnswering.from_pretrained(MODEL_PATH)
+except Exception as e:
+    raise RuntimeError(f"Failed to load model or processor: {e}")
 
 
-@app.post("/predict/")
-def predict(question: str):
-    try:
-        results = []
-        prompt = f"Is there a {question} in the photo?"
-        # Ensuring that directory exists
-        if not os.path.isdir(INDEX_DIRECTORY):
-            return {"error": f"The directory '{INDEX_DIRECTORY}' does not exist."}
+@app.post(
+    "/search/",
+    summary="Semantic search for objects in screenshots",
+    description=(
+        "This endpoint enables semantic search of objects within the uploaded "
+        "screenshots. Users can query for specific objects, and the BLIP model "
+        "will analyze the screenshots to determine if the queried object is pre"
+        "sent. Screenshots within each respective uploaded index are analyzed."
+    ),
+    responses={
+        200: {
+            "description": "Search completed successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "example-index1": [
+                            "0dee725b-93e6-4f30-b751-cfaddf739e34",
+                            "4cf2fde4-7b46-4b60-bf94-e7bdc504a8a5",
+                            "57e9f23a-f0ce-4e96-b2a0-d1c4e836422b",
+                        ],
+                        "example-index2": [
+                            "0dee725b-93e6-4f30-b751-cfaddf739e34",
+                            "4cf2fde4-7b46-4b60-bf94-e7bdc504a8a5",
+                            "57e9f23a-f0ce-4e96-b2a0-d1c4e836422b",
+                        ],
+                    }
+                }
+            },
+        },
+        400: {"description": "Directory does not exist."},
+        500: {"description": "Error processing image."},
+    },
+)
+def search(object: str):
+    # Ensuring that directory exists
+    if not os.path.isdir(INDEX_DIRECTORY):
+        logger.error(f"Directory '{INDEX_DIRECTORY}' does not exist.")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Directory '{INDEX_DIRECTORY}' does not exist.",
+        )
 
-        for indexes in os.listdir(INDEX_DIRECTORY):
-            index_dir = os.path.join(
-                INDEX_DIRECTORY, indexes)
-            image_dir = os.path.join(index_dir, "screenshots")
+    results = {}
+    prompt = f"Is there a {object} in the photo?"
 
-            # Obtain image files with specific extensions
-            image_files = [
+    # Iterate through indexed directories
+    for index_name in os.listdir(INDEX_DIRECTORY):
+        index_dir = os.path.join(INDEX_DIRECTORY, index_name)
+        image_dir = os.path.join(index_dir, "screenshots")
+
+        # Skip if 'screenshots' directory doesn't exist
+        if not os.path.isdir(image_dir):
+            logger.warning(f"Skipping index '{index_name}' as 'screenshots' directory does not exist.")
+            continue
+
+        # List image files
+        try:
+            image_paths = [
                 os.path.join(image_dir, f)
                 for f in os.listdir(image_dir)
-                if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+                if os.path.isfile(os.path.join(image_dir, f))
             ]
+        except Exception as e:
+            logger.error(f"Error listing files in {image_dir}: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error listing files in {image_dir}: {e}",
+            )
 
-            if not image_files:
-                return {"error": "No image files found in the directory."}
+        # Process each image
+        selected_images = []
+        for image_path in image_paths:
+            try:
+                image = Image.open(image_path)
+                inputs = processor(image, prompt, return_tensors="pt")
+                output = model.generate(**inputs)
+                answer = processor.decode(output[0], skip_special_tokens=True)
+                if answer == "yes":
+                    selected_images.append(os.path.basename(image_path))
+            except UnidentifiedImageError:
+                # Skip files that are not valid images
+                logger.warning(f"Skipping invalid image: {image_path}")
+                continue
+            except Exception as e:
+                # Log specific errors but continue processing
+                logger.error(f"Error listing files in {image_dir}: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Error processing image '{image_path}': {e}",
+                )
 
-            selected_images = []
-            for image_path in image_files:
-                try:
-                    # Running it through the model
-                    # Loading the image
-                    image = Image.open(image_path)
-                    # Process the image and question
-                    inputs = processor(image, prompt, return_tensors="pt")
-                    out = model.generate(**inputs)
-                    answer = processor.decode(out[0], skip_special_tokens=True)
+        # Add results if there are selected images
+        if selected_images:
+            results[index_name] = selected_images
 
-                    # Only append images of those that the model returns a yes to the prompt
-                    if answer == "yes":
-                        selected_images.append(os.path.basename(image_path))
-                except Exception as e:
-                    return {"error": str(e) + "for the path" + image_path}
-            results.append({os.path.basename(index_dir): selected_images})
-
-        merged_results = {
-            key: value for d in results for key, value in d.items()}
-
-        results_json = json.dumps(merged_results)
-
-        return results_json
-
-    except Exception as e:
-        return {"error": str(e)}
+    return results
