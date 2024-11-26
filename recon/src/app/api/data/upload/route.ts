@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     await fs.writeFile(`./uploads/${indexName}/${dbFile.name}`, dbBuffer)
     await jszip.loadAsync(ssArrayBuffer).then((zip) => {
       Object.keys(zip.files).forEach((filename) => {
-        zip.files[filename].async("string").then((fileData) => {
+        zip.files[filename].async("nodebuffer").then((fileData) => {
           fs.writeFile(
             `./uploads/${indexName}/screenshots/${filename}`,
             fileData
