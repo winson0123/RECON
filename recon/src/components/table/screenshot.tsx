@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 
-import { useGetScreenshotQuery } from "@/features/search/searchSlice"
+import { useGetScreenshotQuery } from "@/app/api/searchSlice"
 
 interface ScreenshotProps {
   filePath: string // The server file path

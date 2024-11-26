@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import elasticClient from '@/backend/elastic'
 import { SearchResults } from '@/components/table/columns'
-import searchFields from '@/features/search/searchFields'
 
 export interface ElasticResponse {
   timestamp: number
@@ -44,11 +43,7 @@ export async function GET(req:NextRequest) {
           default_operator: 'AND',
           lenient: true,
           query: `${query}*`,
-          fields: fields.length
-            ? fields.map(
-                (field) => `${searchFields[field as keyof typeof searchFields]}`,
-              )
-            : undefined,
+          fields: fields.length ? fields : undefined,
           flags: 'ESCAPE|NOT|OR|PHRASE|PREFIX|WHITESPACE',
         }}) as QueryDslQueryContainer],
         filter: filterQuery,

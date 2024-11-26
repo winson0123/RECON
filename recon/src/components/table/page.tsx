@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
 
-import { useSearchElasticQuery } from "@/features/search/searchSlice"
+import { useSearchElasticQuery } from "@/app/api/searchSlice"
 
 export default function DemoPage() {
   const searchParams = useSearchParams()
