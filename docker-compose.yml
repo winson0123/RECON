@@ -26,7 +26,6 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./model/api:/app/model/api/
       - ./tmp/uploads:/app/model/uploads
     networks:
       - recon
