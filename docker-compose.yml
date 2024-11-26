@@ -16,6 +16,20 @@ services:
     networks:
       - recon
 
+  recon_model:
+    container_name: recon_model
+    image: recon_model:dev
+    build:
+      context: .
+      dockerfile: model/Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    volumes:
+      - ./tmp/uploads:/app/model/uploads
+    networks:
+      - recon
+
   database:
     container_name: recon_db
     image: docker.io/library/postgres:latest

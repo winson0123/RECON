@@ -1,0 +1,8 @@
+--find-links https://download.pytorch.org/whl/torch/
+
+pillow==11.0.0
+torch==2.5.1+cpu
+fastapi==0.115.5
+transformers==4.46.3
+uvicorn==0.32.1
+gunicorn==23.0.0
