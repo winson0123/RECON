@@ -14,10 +14,10 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <StoreProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning className="h-full">
         <head />
         <title> Dashboard </title>
-        <body>
+        <body className="h-full">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
