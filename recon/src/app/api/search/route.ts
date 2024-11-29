@@ -19,13 +19,13 @@ export async function GET(req:NextRequest) {
     const searchParams = req.nextUrl.searchParams
     // TODO: Escape special characters in query
     let query = searchParams.get('query') || ''
-    let fields = searchParams.getAll('fields') || []
+    let indices = searchParams.get('indices')
+    let fields = searchParams.get('fields')
     let dateStart = searchParams.get('dateStart')
     let dateEnd = searchParams.get('dateEnd')
 
     const createdAtRange = {
       timestamp: {
-        time_zone: '+08:00',
         gte: dateStart || undefined,
         lte: dateEnd || undefined,
       },
@@ -43,7 +43,7 @@ export async function GET(req:NextRequest) {
           default_operator: 'AND',
           lenient: true,
           query: `${query}*`,
-          fields: fields.length ? fields : undefined,
+          fields: fields ? fields.split(',') : undefined,
           flags: 'ESCAPE|NOT|OR|PHRASE|PREFIX|WHITESPACE',
         }}) as QueryDslQueryContainer],
         filter: filterQuery,
@@ -53,7 +53,7 @@ export async function GET(req:NextRequest) {
     try {
       if (!process.env.ELASTIC_BASEURL) throw new Error("Invalid ELASTIC_BASEURL environment variable")
         const { hits } = await elasticClient.search<ElasticResponse>({
-          index: '*',
+          index: indices ? indices.split(',') : '*',
           query: searchQuery,
           size: 10000,
           rest_total_hits_as_int: true,
@@ -68,9 +68,7 @@ export async function GET(req:NextRequest) {
         screenshot: `./uploads/${hit._index}/screenshots/${hit._source!.imageToken}`,
         subResults:{
           index: hit._index,
-          host: hit._index,
           window: hit._source!.windowTitle,
-          source: hit._index,
           sourcetype: "Text matches",
           appName: hit._source!.appName,
           windowsAppId: hit._source!.windowsAppId,
