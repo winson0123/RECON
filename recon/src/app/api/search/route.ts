@@ -98,7 +98,7 @@ export async function GET(req:NextRequest) {
             post_tags: ['</span>'],
             fields: {
               '*': {
-                highlight_query: searchQuery,
+                number_of_fragments: 0,
               },
             },
           },
@@ -115,18 +115,18 @@ export async function GET(req:NextRequest) {
         return {
           id: hit._id!,
           time: hit._source!.timestamp,
-          string: hit._source!.strings,
+          strings: hit._source!.strings,
           screenshot: `./uploads/${hit._index}/screenshots/${hit._source!.imageToken}`,
           subResults: {
             index: hit._index,
-            window: hit._source!.windowTitle,
+            windowTitle: hit._source!.windowTitle,
             sourceType,
             appName: hit._source!.appName,
             windowsAppId: hit._source!.windowsAppId,
             fallbackUri: hit._source!.fallbackUri,
             path: hit._source!.path,
           },
-          highlight: hit.highlight
+          highlight: hit.highlight!
         }
       })
 

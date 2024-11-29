@@ -2,6 +2,8 @@
 
 import { InfoCircledIcon } from "@radix-ui/react-icons"
 import { ColumnDef } from "@tanstack/react-table"
+import DOMPurify from "isomorphic-dompurify"
+
 import {
   ArrowDown,
   ArrowUp,
@@ -19,14 +21,15 @@ import { useSidebar } from "@/components/ui/sidebar"
 export type SearchResults = {
   id: string
   time: number
-  string: string
+  strings: string
   screenshot: string
   subResults: SubSearchResults
+  highlight: Record<string, string[]>
 }
 
 export type SubSearchResults = {
   index: string
-  window: string
+  windowTitle: string
   sourceType: string
   appName: string
   windowsAppId: string
@@ -36,12 +39,12 @@ export type SubSearchResults = {
 
 export const subSearchResultsMock: SubSearchResults = {
   index: "",
-  window: "",
+  windowTitle: "",
   sourceType: "",
   appName: "",
   windowsAppId: "",
   fallbackUri: "",
-  path: ""
+  path: "",
 }
 
 export const columns: ColumnDef<SearchResults>[] = [
@@ -82,7 +85,7 @@ export const columns: ColumnDef<SearchResults>[] = [
     },
   },
   {
-    accessorKey: "string",
+    accessorKey: "strings",
     header: ({ column }) => (
       <Button variant="ghost" onClick={column.getToggleSortingHandler()}>
         Strings captured
@@ -96,17 +99,37 @@ export const columns: ColumnDef<SearchResults>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const value = row.getValue("string") as string
+      const value = row.getValue("strings") as string
       const { selectedFields = [] } = useSidebar()
 
       return (
         <>
           <div className="flex h-full flex-col justify-between">
-            <div className="flex-1">
-              {!row.getIsExpanded() && value.length > 255
-                ? value.substring(0, 255) + "..."
-                : value}
-            </div>
+            {Object.keys(row.original.highlight).includes("strings") ? (
+              <div
+                className="flex-1"
+                // Sanitized against XSS
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(
+                    !row.getIsExpanded() &&
+                      row.original.highlight["strings"][0].length > 255
+                      ? row.original.highlight["strings"][0].substring(0, 255) +
+                          "..."
+                      : row.original.highlight["strings"][0],
+                    {
+                      ALLOWED_TAGS: ["span"],
+                      ALLOWED_ATTR: ["class"],
+                    }
+                  ),
+                }}
+              ></div>
+            ) : (
+              <div className="flex-1">
+                {!row.getIsExpanded() && value.length > 255
+                  ? value.substring(0, 255) + "..."
+                  : value}
+              </div>
+            )}
             <div className="flex flex-wrap space-x-1 overflow-hidden">
               {selectedFields.map((key: string, index: number) => {
                 // Get the value corresponding to the key from subResults
@@ -121,7 +144,23 @@ export const columns: ColumnDef<SearchResults>[] = [
                     key={key}
                   >
                     <div className="text-slate-500"> {key} = </div>
-                    <div className="ml-1">{key_value}</div>
+                    {Object.keys(row.original.highlight).includes(key) ? (
+                      <div
+                        className="ml-1"
+                        // Sanitized against XSS
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            row.original.highlight[key][0],
+                            {
+                              ALLOWED_TAGS: ["span"],
+                              ALLOWED_ATTR: ["class"],
+                            }
+                          ),
+                        }}
+                      ></div>
+                    ) : (
+                      <div className="ml-1">{key_value}</div>
+                    )}
                   </div>
                 )
               })}
@@ -137,7 +176,13 @@ export const columns: ColumnDef<SearchResults>[] = [
     header: "Screenshot Preview",
     cell: ({ row }) => {
       const path = row.getValue("screenshot") as string
-      return <Screenshot filePath={path}/>
+      if (Object.keys(row.original.highlight).includes("imageToken.keyword"))
+        return (
+          <div className="border-2 border-black">
+            <Screenshot filePath={path} />
+          </div>
+        )
+      return <Screenshot filePath={path} />
     },
   },
 ]
