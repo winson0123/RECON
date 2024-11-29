@@ -62,8 +62,8 @@ export async function GET(req:NextRequest) {
         bool: {
           must: [
             {
-              match: {
-                'imageToken': imageTokens.join(' '),
+              terms: {
+                'imageToken.keyword': imageTokens, 
               },
             },
           ],
@@ -109,7 +109,7 @@ export async function GET(req:NextRequest) {
         let sourceType: string
         const highlightKeys = hit.highlight ? Object.keys(hit.highlight): []
         if (highlightKeys.length === 0) sourceType = ''
-        else if (highlightKeys.includes('imageToken'))
+        else if (highlightKeys.includes('imageToken.keyword'))
           sourceType = highlightKeys.length === 1 ? 'Image Match' : 'Text and Image Match'
         else sourceType = 'Text Match'
         return {
