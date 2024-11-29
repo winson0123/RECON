@@ -25,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import DeleteButton from "@/components/table/delete-button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
@@ -97,46 +98,32 @@ export const columns: ColumnDef<Index>[] = [
     },
   },
   {
-    id: "actions",
+    id: "edit",
     enableHiding: false,
     cell: ({ row }) => {
       const index = row.original
-
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(index.id.toString())}
-            >
-              Copy ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => console.log(`View Index ${index.id.toString()}`)}
-            >
-              View Index
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="red-500"
-              onClick={() => console.log(`Delete Index ${index.id.toString()}`)}
-            >
-              Delete Index
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="secondary"
+          onClick={() => console.log(`Edit Index ${index.id.toString()}`)}
+        >
+          Edit
+        </Button>
       )
+    },
+  },
+  ,
+  {
+    id: "delete",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const index = row.original
+      return <DeleteButton id={index.id.toString()} />
     },
   },
 ] as Array<ColumnDef<unknown, any>>
 
-export default function Upload() {
+export default function Manage() {
   const { toast } = useToast()
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
