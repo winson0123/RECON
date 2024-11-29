@@ -46,7 +46,7 @@ export default function DemoPage() {
   }
 
   if (!data?.results?.length)
-    return <p className="text-center">No matching submissions found</p>
+    return <p className="text-center">No matches found</p>
 
   return (
     <div className="container mx-auto py-10">

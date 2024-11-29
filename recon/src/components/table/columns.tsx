@@ -27,7 +27,7 @@ export type SearchResults = {
 export type SubSearchResults = {
   index: string
   window: string
-  sourcetype: string
+  sourceType: string
   appName: string
   windowsAppId: string
   fallbackUri: string | null
@@ -37,7 +37,7 @@ export type SubSearchResults = {
 export const subSearchResultsMock: SubSearchResults = {
   index: "",
   window: "",
-  sourcetype: "",
+  sourceType: "",
   appName: "",
   windowsAppId: "",
   fallbackUri: "",

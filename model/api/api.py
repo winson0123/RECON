@@ -28,7 +28,7 @@ except Exception as e:
     raise RuntimeError(f"Failed to load model or processor: {e}")
 
 
-@app.post(
+@app.get(
     "/search/",
     summary="Semantic search for objects in screenshots",
     description=(

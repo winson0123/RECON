@@ -24,6 +24,12 @@ export async function GET(req:NextRequest) {
     let dateStart = searchParams.get('dateStart')
     let dateEnd = searchParams.get('dateEnd')
 
+    let imageTokenMapping: Record<string, string[]> = {}  // mapping of index to uuids
+    if (query && (!fields || fields.split(',').includes("Semantic search for objects in screenshots"))) {
+      const response = await fetch(`http://recon_model:8000/search/?object=${encodeURIComponent(query)}`)
+      imageTokenMapping = await response.json()
+    }
+
     const createdAtRange = {
       timestamp: {
         gte: dateStart || undefined,
@@ -37,19 +43,48 @@ export async function GET(req:NextRequest) {
       },
     ]
 
-    const searchQuery: QueryDslQueryContainer = {
-      bool: {
-        must: [({simple_query_string: {
-          default_operator: 'AND',
-          lenient: true,
-          query: `${query}*`,
-          fields: fields ? fields.split(',') : undefined,
-          flags: 'ESCAPE|NOT|OR|PHRASE|PREFIX|WHITESPACE',
-        }}) as QueryDslQueryContainer],
-        filter: filterQuery,
+    const shouldQueries: QueryDslQueryContainer[] = []
+
+    // Text Query
+    shouldQueries.push({
+      simple_query_string: {
+        default_operator: 'AND',
+        lenient: true,
+        query: `${query}*`,
+        fields: fields ? fields.split(',') : undefined,
+        flags: 'ESCAPE|NOT|OR|PHRASE|PREFIX|WHITESPACE',
       },
+    })
+
+    // Semantic search for objects in screenshots
+    for (const [index, imageTokens] of Object.entries(imageTokenMapping)) {
+      shouldQueries.push({
+        bool: {
+          must: [
+            {
+              match: {
+                'imageToken': imageTokens.join(' '),
+              },
+            },
+          ],
+          filter: [
+            {
+              term: {
+                _index: index,
+              },
+            },
+            ...filterQuery,
+          ],
+        },
+      })
     }
 
+    const searchQuery: QueryDslQueryContainer = {
+      bool: {
+        should: shouldQueries,
+      },
+    }
+    
     try {
       if (!process.env.ELASTIC_BASEURL) throw new Error("Invalid ELASTIC_BASEURL environment variable")
         const { hits } = await elasticClient.search<ElasticResponse>({
@@ -57,25 +92,43 @@ export async function GET(req:NextRequest) {
           query: searchQuery,
           size: 10000,
           rest_total_hits_as_int: true,
+          highlight: {
+            encoder: 'html',
+            pre_tags: ['<span class="font-bold">'],
+            post_tags: ['</span>'],
+            fields: {
+              '*': {
+                highlight_query: searchQuery,
+              },
+            },
+          },
           // sort: [{ 'timestamp': { order: 'desc' } }],
         })
 
-      /* eslint-disable no-underscore-dangle */
-      const results: SearchResults[] = hits.hits.map((hit) => ({
-        id: hit._id!,
-        time: hit._source!.timestamp,
-        string: hit._source!.strings,
-        screenshot: `./uploads/${hit._index}/screenshots/${hit._source!.imageToken}`,
-        subResults:{
-          index: hit._index,
-          window: hit._source!.windowTitle,
-          sourcetype: "Text matches",
-          appName: hit._source!.appName,
-          windowsAppId: hit._source!.windowsAppId,
-          fallbackUri: hit._source!.fallbackUri,
-          path: hit._source!.path,
+      const results: SearchResults[] = hits.hits.map((hit) => {
+        let sourceType: string
+        const highlightKeys = hit.highlight ? Object.keys(hit.highlight): []
+        if (highlightKeys.length === 0) sourceType = ''
+        else if (highlightKeys.includes('imageToken'))
+          sourceType = highlightKeys.length === 1 ? 'Image Match' : 'Text and Image Match'
+        else sourceType = 'Text Match'
+        return {
+          id: hit._id!,
+          time: hit._source!.timestamp,
+          string: hit._source!.strings,
+          screenshot: `./uploads/${hit._index}/screenshots/${hit._source!.imageToken}`,
+          subResults: {
+            index: hit._index,
+            window: hit._source!.windowTitle,
+            sourceType,
+            appName: hit._source!.appName,
+            windowsAppId: hit._source!.windowsAppId,
+            fallbackUri: hit._source!.fallbackUri,
+            path: hit._source!.path,
+          },
+          highlight: hit.highlight
         }
-      }))
+      })
 
       return NextResponse.json({ results, resultSize: hits.total })
     } catch (error) {

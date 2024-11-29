@@ -14,6 +14,7 @@ const fieldsOptions = [
   "windowsAppId",
   "fallbackUrl",
   "path",
+  "Semantic search for objects in screenshots",
 ]
 
 export default function SearchBar() {
