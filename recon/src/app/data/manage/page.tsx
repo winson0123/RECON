@@ -97,22 +97,21 @@ export const columns: ColumnDef<Index>[] = [
       )
     },
   },
-  {
-    id: "edit",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const index = row.original
-      return (
-        <Button
-          variant="secondary"
-          onClick={() => console.log(`Edit Index ${index.id.toString()}`)}
-        >
-          Edit
-        </Button>
-      )
-    },
-  },
-  ,
+  // {
+  //   id: "edit",
+  //   enableHiding: false,
+  //   cell: ({ row }) => {
+  //     const index = row.original
+  //     return (
+  //       <Button
+  //         variant="secondary"
+  //         onClick={() => console.log(`Edit Index ${index.id.toString()}`)}
+  //       >
+  //         Edit
+  //       </Button>
+  //     )
+  //   },
+  // },
   {
     id: "delete",
     enableHiding: false,
