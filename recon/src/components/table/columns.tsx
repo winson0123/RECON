@@ -112,6 +112,7 @@ export const columns: ColumnDef<SearchResults>[] = [
                 // Get the value corresponding to the key from subResults
                 const key_value =
                   row.original.subResults[key as keyof SubSearchResults]
+                if (!key_value) return null
                 return (
                   <div
                     className={`flex ${index === 0 ? "ml-1" : "before:content-['|']"} ${
