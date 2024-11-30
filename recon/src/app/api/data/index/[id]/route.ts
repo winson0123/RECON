@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import fs from "node:fs/promises"
 import prisma from "@/backend/prisma"
+import elasticClient from "@/backend/elastic"
 
 export async function GET(
   req: NextRequest,
@@ -78,6 +79,7 @@ export async function DELETE(
         },
       })
       const { indexName } = result
+      elasticsearchDelete(indexName)
       fs.rmdir(`./uploads/${indexName}`, { recursive: true })
       return NextResponse.json({
         status: "success",
@@ -92,5 +94,15 @@ export async function DELETE(
   } catch (e) {
     console.error(e)
     return NextResponse.json({ status: "fail", error: e })
+  }
+}
+
+async function elasticsearchDelete(indexName: string) {
+  try {
+    await elasticClient.indices.delete({ index: indexName })
+    console.log("Index has been deleted from Elasticsearch")
+  } catch (e) {
+    console.error("Error deleting index from Elasticsearch:", e)
+    throw e
   }
 }
