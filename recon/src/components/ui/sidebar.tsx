@@ -107,23 +107,13 @@ const SidebarProvider = React.forwardRef<
       const savedSelectedFields = localStorage.getItem(SIDEBAR_SELECTED_FIELDS)
       const parsedSelectedFields = savedSelectedFields
         ? JSON.parse(savedSelectedFields)
-        : []
-      const savedInterestingFields = localStorage.getItem(
-        SIDEBAR_INTERESTING_FIELDS
-      )
-      const parsedInterestingFields = savedInterestingFields
-        ? JSON.parse(savedInterestingFields)
-        : []
+        : Object.keys(subSearchResultsMock).splice(0, 4)
 
-      setSelectedFields(
-        parsedSelectedFields.length || parsedInterestingFields.length
-          ? parsedSelectedFields
-          : Object.keys(subSearchResultsMock).splice(0, 4)
-      )
+      setSelectedFields(parsedSelectedFields)
       setInterestingFields(
-        parsedInterestingFields.length || parsedSelectedFields.length
-          ? parsedInterestingFields
-          : Object.keys(subSearchResultsMock).splice(4)
+        Object.keys(subSearchResultsMock).filter(
+          (key) => !parsedSelectedFields.includes(key)
+        )
       )
     }, [])
 
