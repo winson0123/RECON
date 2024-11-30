@@ -3,9 +3,10 @@
 import { Button } from "@/components/ui/button"
 import React from "react"
 
-export default function DeleteButton({ id }) {
+export default function DeleteButton({ id, setLoading, setData }) {
   const handleDelete = async () => {
     try {
+        setLoading(true)
       const response = await fetch(`/api/data/index/${id}`, {
         method: "DELETE",
       })
@@ -13,9 +14,12 @@ export default function DeleteButton({ id }) {
       if (!response.ok) {
         throw new Error(`Failed to delete. Status: ${response.status}`)
       }
-
-      const data = await response.json()
-      console.log("Delete successful:", data)
+      await fetch("/api/data/index")
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data)
+        setLoading(false)
+      })
     } catch (error) {
       console.error("Error deleting index:", error)
     }

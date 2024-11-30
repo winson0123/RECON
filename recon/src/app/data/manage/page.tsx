@@ -46,82 +46,6 @@ export type Index = {
   captures: number
 }
 
-export const columns: ColumnDef<Index>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "captures",
-    header: () => <div className="text-center">Captures</div>,
-    cell: ({ row }) => {
-      return (
-        <div className="text-center font-medium">
-          {row.getValue("captures")}
-        </div>
-      )
-    },
-  },
-  // {
-  //   id: "edit",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     const index = row.original
-  //     return (
-  //       <Button
-  //         variant="secondary"
-  //         onClick={() => console.log(`Edit Index ${index.id.toString()}`)}
-  //       >
-  //         Edit
-  //       </Button>
-  //     )
-  //   },
-  // },
-  {
-    id: "delete",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const index = row.original
-      return <DeleteButton id={index.id.toString()} />
-    },
-  },
-] as Array<ColumnDef<unknown, any>>
-
 export default function Manage() {
   const { toast } = useToast()
   const [data, setData] = useState(null)
@@ -141,6 +65,82 @@ export default function Manage() {
         setLoading(false)
       })
   }, [])
+
+  const columns: ColumnDef<Index>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Name
+            <ArrowUpDown />
+          </Button>
+        )
+      },
+      cell: ({ row }) => (
+        <div className="font-medium">{row.getValue("name")}</div>
+      ),
+    },
+    {
+      accessorKey: "captures",
+      header: () => <div className="text-center">Captures</div>,
+      cell: ({ row }) => {
+        return (
+          <div className="text-center font-medium">
+            {row.getValue("captures")}
+          </div>
+        )
+      },
+    },
+    // {
+    //   id: "edit",
+    //   enableHiding: false,
+    //   cell: ({ row }) => {
+    //     const index = row.original
+    //     return (
+    //       <Button
+    //         variant="secondary"
+    //         onClick={() => console.log(`Edit Index ${index.id.toString()}`)}
+    //       >
+    //         Edit
+    //       </Button>
+    //     )
+    //   },
+    // },
+    {
+      id: "delete",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const index = row.original
+        return <DeleteButton id={index.id.toString()} setLoading={setLoading} setData={setData} />
+      },
+    },
+  ] as Array<ColumnDef<unknown, any>>
 
   const table = useReactTable({
     data,
