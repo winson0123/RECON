@@ -178,7 +178,7 @@ export const columns: ColumnDef<SearchResults>[] = [
       const path = row.getValue("screenshot") as string
       if (Object.keys(row.original.highlight).includes("imageToken.keyword"))
         return (
-          <div className="border-2 border-black">
+          <div className="border-2 border-red-500">
             <Screenshot filePath={path} />
           </div>
         )
