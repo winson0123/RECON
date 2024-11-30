@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { useGetIndicesQuery } from "@/app/api/searchSlice"
 import { Textarea } from "@/components/ui/textarea"
+import { Tooltip } from "@mui/material"
 
 const fieldsOptions = [
   "appName",
@@ -22,8 +23,6 @@ export default function SearchBar() {
 
   const [isFocused, setIsFocused] = useState(false)
   const [inputValue, setInputValue] = useState("")
-  const [selectedFields, setSelectedFields] = useState<string[]>([])
-  const [selectedIndices, setSelectedIndices] = useState<string[]>([])
   const [dateStart, setDateStart] = useState("")
   const [dateEnd, setDateEnd] = useState("")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -49,10 +48,6 @@ export default function SearchBar() {
       e.preventDefault()
       const urlParams = new URLSearchParams()
       if (inputValue) urlParams.append("query", inputValue)
-      if (selectedIndices.length > 0)
-        urlParams.append("indices", selectedIndices.join(","))
-      if (selectedFields.length > 0)
-        urlParams.append("fields", selectedFields.join(","))
       if (dateStart) urlParams.append("dateStart", dateStart)
       if (dateEnd) urlParams.append("dateEnd", dateEnd)
       router.push(`/?${urlParams}`, { scroll: false })
@@ -61,18 +56,6 @@ export default function SearchBar() {
       // setDateStart("")
       // setDateEnd("")
     }
-  }
-
-  const toggleIndex = (index: string) => {
-    setSelectedIndices((prev) =>
-      prev.includes(index) ? prev.filter((f) => f !== index) : [...prev, index]
-    )
-  }
-
-  const toggleField = (field: string) => {
-    setSelectedFields((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
-    )
   }
 
   // Handle clicks outside of the dropdown and textarea
@@ -134,41 +117,9 @@ export default function SearchBar() {
           style={{ top: `${textareaRef.current?.offsetHeight}px` }} // Position below the textarea
         >
           <div className="mb-2">
-            <h4 className="font-semibold">Index:</h4>
-            <div className="flex flex-wrap">
-              {indices &&
-                indices.map((index) => (
-                  <label key={index} className="mr-4 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedIndices.includes(index)}
-                      onChange={() => toggleIndex(index)}
-                      className="mr-1"
-                    />
-                    {index}
-                  </label>
-                ))}
-            </div>
-          </div>
-          <div className="mb-2">
-            <h4 className="font-semibold">Search Within:</h4>
-            {fieldsOptions.map((field) => (
-              <label key={field} className="block">
-                <input
-                  type="checkbox"
-                  checked={selectedFields.includes(field)}
-                  onChange={() => toggleField(field)}
-                />
-                {field}
-              </label>
-            ))}
-          </div>
-          <div className="mb-2">
             <h4 className="font-semibold">Date Range:</h4>
             <div className="mb-1 flex items-center">
-              <label className="mr-2 min-w-12">
-                From:
-              </label>
+              <label className="mr-2 min-w-12">From:</label>
               <input
                 id="dateStart"
                 type="datetime-local"
@@ -179,9 +130,7 @@ export default function SearchBar() {
               />
             </div>
             <div className="flex items-center">
-              <label className="mr-2 min-w-12">
-                To:
-              </label>
+              <label className="mr-2 min-w-12">To:</label>
               <input
                 id="dateEnd"
                 type="datetime-local"
@@ -190,6 +139,71 @@ export default function SearchBar() {
                 }
                 className="rounded border border-gray-300 p-1"
               />
+            </div>
+          </div>
+          <div className="mb-2">
+            <h4 className="font-semibold">How to use this search bar:</h4>
+            <div className="border-b">
+              <div className="flex items-center">
+                <span>Use the Lucene query syntax</span>
+                <Tooltip
+                  title={
+                    <>
+                      <p>
+                        the query is strict and returns an error if the query
+                        string includes any invalid syntax
+                      </p>
+                      <p>
+                        note that special characters need to be escaped with
+                        backslash
+                      </p>
+                    </>
+                  }
+                >
+                  <span className="ml-1 cursor-default select-none text-lg font-normal">
+                    &#128712;
+                  </span>
+                </Tooltip>
+              </div>
+              <ul className="ml-4 list-disc text-sm text-gray-800">
+                <li>
+                  'AND' and 'OR' operators are not supported in conjunction with
+                  image semantic search
+                </li>
+              </ul>
+            </div>
+            <div className="border-b">
+              Available fields to specify in addition to those in the sidebar:
+              <ul className="ml-4 list-disc text-sm text-gray-800">
+                <li>strings</li>
+                <li>screenshot</li>
+              </ul>
+            </div>
+            <div>
+              Example queries:
+              <ul className="ml-4 list-disc text-sm text-gray-800">
+                <li>
+                  <a href="/?query=index:abc appName:'Microsoft Edge' strings:Google">
+                    index:abc appName:"Microsoft Edge" strings:Google
+                  </a>
+                </li>
+                <li>
+                  <a href="/?query=screenshot:monkey">screenshot:monkey</a>
+                </li>
+              </ul>
+            </div>
+            <div className="border-b">
+              Query matches will be bolded (black border for matching
+              screenshots)
+            </div>
+          </div>
+          <div className="mb-2">
+            <h4 className="font-semibold">List of Indices:</h4>
+            <div className="flex flex-wrap">
+              {indices &&
+                indices.map((index) => (
+                  <span className="rounded border px-2 py-1">{index}</span>
+                ))}
             </div>
           </div>
         </div>
