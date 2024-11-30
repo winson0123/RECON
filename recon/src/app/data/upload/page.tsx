@@ -77,7 +77,7 @@ export default function Upload() {
   }
 
   return (
-    <form className={`m-8 w-full content-center`} style={fileDropBoxStyle}>
+    <form className={`m-8 content-center`} style={fileDropBoxStyle}>
       <div className="">
         <div className="mx-auto h-32 w-32">
           <CloudUpload className="h-32 w-32" />
