@@ -11,20 +11,14 @@ import { useSearchElasticQuery } from "@/app/api/searchSlice"
 export default function DemoPage() {
   const searchParams = useSearchParams()
   const [query, setQuery] = useState<string>("")
-  const [selectedIndices, setSelectedIndices] = useState<string>("")
-  const [selectedFields, setSelectedFields] = useState<string>("")
   const [dateStart, setDateStart] = useState<string>("")
   const [dateEnd, setDateEnd] = useState<string>("")
 
   useEffect(() => {
     const queryParam = searchParams.get("query")
-    const selectedIndicesParam = searchParams.get("indices")
-    const selectedFieldsParam = searchParams.get("fields")
     const dateStartParam = searchParams.get("dateStart")
     const dateEndParam = searchParams.get("dateEnd")
     setQuery(queryParam ?? "")
-    setSelectedIndices(selectedIndicesParam ?? "")
-    setSelectedFields(selectedFieldsParam ?? "")
     setDateStart(dateStartParam ?? "")
     setDateEnd(dateEndParam ?? "")
   }, [searchParams])
@@ -33,8 +27,6 @@ export default function DemoPage() {
   // Future enhancement: Server-side pagination and sorting, only required if search result set is too big which is unlikely at this stage.
   const { data, isLoading, isFetching, isError } = useSearchElasticQuery({
     query,
-    indices: selectedIndices,
-    fields: selectedFields,
     dateStart,
     dateEnd,
   })
