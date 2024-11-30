@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState } from "react"
 import Image from "next/image"
 
 import { useGetScreenshotQuery } from "@/app/api/searchSlice"
@@ -13,7 +13,7 @@ const Screenshot: React.FC<ScreenshotProps> = ({ filePath }) => {
   const { data: base64Image } = useGetScreenshotQuery({
     path: filePath,
   })
-  const [isEnlarged, setIsEnlarged] = useState(false);
+  const [isEnlarged, setIsEnlarged] = useState(false)
 
   if (!base64Image?.base64) return <></>
 
@@ -21,7 +21,7 @@ const Screenshot: React.FC<ScreenshotProps> = ({ filePath }) => {
     <>
       <div className="flex transform justify-center hover:scale-105 hover:transition-transform hover:duration-200">
         <Image
-          className="rounded-lg cursor-pointer"
+          className="cursor-pointer rounded-lg"
           src={`data:image/jpg;base64,${base64Image.base64}`}
           alt="Screenshot"
           width={200}
@@ -36,7 +36,7 @@ const Screenshot: React.FC<ScreenshotProps> = ({ filePath }) => {
           onClick={() => setIsEnlarged(false)}
         >
           <Image
-            className="rounded-lg cursor-pointer"
+            className="cursor-pointer rounded-lg"
             src={`data:image/jpg;base64,${base64Image.base64}`}
             alt="Enlarged Screenshot"
             width={1200}
