@@ -113,7 +113,7 @@ export default function SearchBar() {
       {isFocused && (
         <div
           ref={dropdownRef}
-          className="absolute left-0 right-0 z-10 mt-1 rounded border border-gray-300 bg-white p-4 shadow-lg"
+          className="absolute left-0 right-0 z-10 mt-1 rounded border border-gray-300 bg-secondary p-4 shadow-lg"
           style={{ top: `${textareaRef.current?.offsetHeight}px` }} // Position below the textarea
         >
           <div className="mb-2">
@@ -165,7 +165,7 @@ export default function SearchBar() {
                   </span>
                 </Tooltip>
               </div>
-              <ul className="ml-4 list-disc text-sm text-gray-800">
+              <ul className="ml-4 list-disc text-sm">
                 <li>
                   'AND' and 'OR' operators are not supported in conjunction with
                   image semantic search
@@ -174,14 +174,14 @@ export default function SearchBar() {
             </div>
             <div className="border-b">
               Available fields to specify in addition to those in the sidebar:
-              <ul className="ml-4 list-disc text-sm text-gray-800">
+              <ul className="ml-4 list-disc text-sm">
                 <li>strings</li>
                 <li>screenshot</li>
               </ul>
             </div>
             <div>
               Example queries:
-              <ul className="ml-4 list-disc text-sm text-gray-800">
+              <ul className="ml-4 list-disc text-sm">
                 <li>
                   <a href="/?query=index:abc appName:'Microsoft Edge' strings:Google">
                     index:abc appName:"Microsoft Edge" strings:Google
@@ -202,7 +202,7 @@ export default function SearchBar() {
             <div className="flex flex-wrap">
               {indices &&
                 indices.map((index) => (
-                  <span className="rounded border px-2 py-1">{index}</span>
+                  <span className="rounded border border-primary px-2 py-1">{index}</span>
                 ))}
             </div>
           </div>

@@ -7,6 +7,7 @@ import { columns } from "./columns"
 import { DataTable } from "./data-table"
 
 import { useSearchElasticQuery } from "@/app/api/searchSlice"
+import { Spinner } from "../ui/spinner"
 
 export default function DemoPage() {
   const searchParams = useSearchParams()
@@ -31,7 +32,13 @@ export default function DemoPage() {
     dateEnd,
   })
 
-  if (isLoading || isFetching) return <p className="text-center">Loading...</p>
+  if (isLoading || isFetching) {
+    return (
+      <div className="h-full w-full content-center">
+        <Spinner size="large" />
+      </div>
+    )
+  }
 
   if (isError) {
     return <p className="text-center">Something went wrong</p>
