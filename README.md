@@ -17,23 +17,30 @@ Before deploying RECON, ensure the following dependencies are installed on your 
    cd RECON
    ```
 
-2. Configuration
+1. Configuration
 
    Make a copy of the `.env.sample` file and rename it `.env`. Modify the `.env` file to set any required environment variables such as database credentials, Elasticsearch settings.
 
-3. Build and Deploy Services
+1. Pull BLIP Model with Git LFS
+
+   Use Git LFS to pull the BLIP model files required for semantic search:
+   ```bash
+   git lfs pull
+   ```
+
+1. Build and Deploy Services
 Use the following command to build and start all services:
    ```bash
    docker compose up --build
    ```
 
-4. Verify Deployment
+1. Verify Deployment
 Once all containers are running, verify by accessing the RECON dashboard in your browser at:
    ```
    http://localhost:3000
    ```
 
-5. Shut Down Services
+1. Shut Down Services
 To stop and remove all running containers, use:
    ```bash
    docker compose down
@@ -43,7 +50,7 @@ To stop and remove all running containers, use:
    - Use the "Upload" feature on the dashboard to add Recall database files (SQLite).
    - The platform automatically parses and indexes the data for search and analysis.
 
-2. Conduct Forensic Analysis
+1. Conduct Forensic Analysis
    #### Search Capabilities
 
    - Use the search bar to perform queries using Lucene syntax, including operators like AND, NOT, wildcards, and regex.
