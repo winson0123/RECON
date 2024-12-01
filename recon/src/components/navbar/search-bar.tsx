@@ -1,22 +1,12 @@
 "use client"
 
+import { Tooltip } from "@mui/material"
 import { Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
 import { useGetIndicesQuery } from "@/app/api/searchSlice"
 import { Textarea } from "@/components/ui/textarea"
-import { Tooltip } from "@mui/material"
-
-const fieldsOptions = [
-  "appName",
-  "windowTitle",
-  "strings",
-  "windowsAppId",
-  "fallbackUrl",
-  "path",
-  "Semantic search for objects in screenshots",
-]
 
 export default function SearchBar() {
   const router = useRouter()
@@ -193,8 +183,7 @@ export default function SearchBar() {
               </ul>
             </div>
             <div className="border-b">
-              Query matches will be bolded (red border for matching
-              screenshots)
+              Query matches will be bolded (red border for matching screenshots)
             </div>
           </div>
           <div className="mb-2">
@@ -202,7 +191,12 @@ export default function SearchBar() {
             <div className="flex flex-wrap">
               {indices &&
                 indices.map((index) => (
-                  <span className="rounded border border-primary px-2 py-1">{index}</span>
+                  <span
+                    key={index}
+                    className="rounded border border-primary px-2 py-1"
+                  >
+                    {index}
+                  </span>
                 ))}
             </div>
           </div>
