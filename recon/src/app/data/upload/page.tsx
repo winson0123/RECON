@@ -29,11 +29,22 @@ export default function Upload() {
     evt: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
     evt.preventDefault()
-    if (!indexInput?.current?.value!) {
+
+    const indexValue = indexInput?.current?.value!
+
+    if (!indexValue) {
       toast({
         variant: "destructive",
         title: "Error:",
         description: "The Index name field cannot be empty.",
+      })
+      return
+    } else if (!/^[a-z0-9_.-]+$/.test(indexValue)) {
+      toast({
+        variant: "destructive",
+        title: "Error:",
+        description:
+          "The Index name field can only include lowercase letters (a-z), numbers (0-9), underscores (_), hyphens (-), and periods (.). No spaces.",
       })
       return
     } else if (fileInput?.current?.files?.length == 0) {
