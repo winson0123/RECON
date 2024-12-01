@@ -18,7 +18,8 @@ Before deploying RECON, ensure the following dependencies are installed on your 
    ```
 
 2. Configuration
-Make a copy of the `.env.sample` file and rename it `.env`. Modify the `.env` file to set any required environment variables such as database credentials, Elasticsearch settings.
+
+   Make a copy of the `.env.sample` file and rename it `.env`. Modify the `.env` file to set any required environment variables such as database credentials, Elasticsearch settings.
 
 3. Build and Deploy Services
 Use the following command to build and start all services:
@@ -47,16 +48,19 @@ To stop and remove all running containers, use:
 
    - Use the search bar to perform queries using Lucene syntax, including operators like AND, NOT, wildcards, and regex.
    - Example query:
+
       ```
       appName:"Windows Explorer" OR appName:"Microsoft Edge"
       ```
    #### Semantic Search
    - Utilize the semantic search feature to check for the presence of search item
+
       ```
       screenshot:monkey
       ```
    - The system will process the query through the integrated BLIP model to return relevant screenshots and parsed data.
    - The semantic search API can also be tested by accessing the FastAPI endpoint at:
+
       ```
       http://localhost:8000/docs
       ```
