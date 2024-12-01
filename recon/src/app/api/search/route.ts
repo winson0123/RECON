@@ -59,15 +59,22 @@ export async function GET(req: NextRequest) {
   ]
 
   // Text Query
-  const textQuery = {
-    query_string: {
-      default_operator: "AND",
-      lenient: true,
-      query: query.trim()
-        ? query.replaceAll("index:", "_index:") // simpler to specify index field
-        : "*", // blank queries should return all results
+  const textQuery: QueryDslQueryContainer = {
+    bool: {
+      must: [
+        {
+          query_string: {
+            default_operator: "AND",
+            lenient: true,
+            query: query.trim()
+              ? query.replaceAll("index:", "_index:") // simpler to specify index field
+              : "*", // blank queries should return all results
+          },
+        },
+      ],
+      filter: filterQuery,
     },
-  } as QueryDslQueryContainer
+  }
 
   // Semantic search for objects in screenshots
   const imageQueries: QueryDslQueryContainer[] = []
