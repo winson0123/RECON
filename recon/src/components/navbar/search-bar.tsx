@@ -193,7 +193,7 @@ export default function SearchBar() {
               </ul>
             </div>
             <div className="border-b">
-              Query matches will be bolded (black border for matching
+              Query matches will be bolded (red border for matching
               screenshots)
             </div>
           </div>

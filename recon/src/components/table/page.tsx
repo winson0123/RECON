@@ -34,7 +34,7 @@ export default function DemoPage() {
 
   if (isLoading || isFetching) {
     return (
-      <div className="h-full w-full content-center">
+      <div className="min-h-svh w-full content-center">
         <Spinner size="large" />
       </div>
     )
