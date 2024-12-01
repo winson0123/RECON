@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   let dateStart = searchParams.get("dateStart")
   let dateEnd = searchParams.get("dateEnd")
 
-  const screenshotRegex = /screenshot:(?:"([^"]*)"?|([^\s"]*))/
+  const screenshotRegex = /screenshot:\s*(?:"([^"]*)"?|([^\s"]*))/
 
   let imageTokenMapping: Record<string, string[]> = {} // mapping of index to screenshot uuids
   const isSimpleQuery = !query.includes(":") // if it is a query without specifying of field names
