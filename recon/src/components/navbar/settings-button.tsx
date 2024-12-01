@@ -25,7 +25,6 @@ export default function SettingsButton() {
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => router.push('/data/upload')}>Add Data</DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/data/manage')}>Manage Data</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/profile')}>Profile</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
