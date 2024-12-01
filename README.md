@@ -1,28 +1,65 @@
 # RECON
-
 Recall Extraction and Correlation for Forensic Operations Nexus (RECON)
 
-## BLIP Model Integration
+RECON is a robust platform designed to streamline forensic investigations by leveraging Recall data for advanced indexing, searching, and visual analysis. It enables forensic analysts to quickly extract insights from Recall artifacts, enhancing efficiency and accuracy in cyber incident investigations.
 
-In this project, we utilize the BLIP (Bootstrapped Language-Image Pre-training) model to perform Visual Question Answering (VQA) on Microsoft Recall images. The BLIP model enables the system to process images and respond to related questions with high accuracy, making it a critical component of our application.
+## Deployment Instructions
+### Prerequisites
+Before deploying RECON, ensure the following dependencies are installed on your system:  
+- **Docker**: Version 20.x or higher  
+- **Docker Compose**: Version 2.x or higher  
 
-### Deployment Instructions
+### Steps to Deploy
 
-To deploy the project successfully, please ensure the following prerequisits are met:
+1. **Clone the Repository**  
+   ```bash
+   git clone https://github.com/winson0123/RECON.git
+   cd RECON
+   ```
 
-1. Model and Processor Directories
-   - The following folders must be present in the directory path `RECON/model/api`:
-     - `blip_model`: This folder should contain the pretrained model files like `model.safetensors`, along with the necessary configuration files like `config.json` and `generation_config.json`.
-     - `blip_processor`: This folder should contain the processor files required for input preprocessing like `preprocessor_config.json`, `special_tokens_map.json`, `tokenizer_config.json`, `tokenizer.json`, and `vocab.txt`.
-2. Docker Setup:
-   - Ensure that you have Docker installed and properly configured on your system
-   - Before running the application, ensure the required model and processor folders are correctly placed as outlined above.
-3. Running the Application:
-   - Navigate to the project Root directory where the `docker-compose.yml` file is located.
-   - Execute the following command to build and start the Docker container:
-     ```
-     docker-compose up -d
-     ```
-   - The application will automatically load the BLIP model and processor from the specified directories.
-4. Verification:
-   - Once the container is running, verify that the application is functional by sending test requests via (`127.0.0.1/8000/docs`) or referring to the application logs for confirmation.
+2. Configuration
+Make a copy of the `.env.sample` file and rename it `.env`. Modify the `.env` file to set any required environment variables such as database credentials, Elasticsearch settings.
+
+3. Build and Deploy Services
+Use the following command to build and start all services:
+   ```bash
+   docker compose up --build
+   ```
+
+4. Verify Deployment
+Once all containers are running, verify by accessing the RECON dashboard in your browser at:
+   ```
+   http://localhost:3000
+   ```
+
+5. Shut Down Services
+To stop and remove all running containers, use:
+   ```bash
+   docker compose down
+   ```
+## Usage
+1. Upload Recall Data
+   - Use the "Upload" feature on the dashboard to add Recall database files (SQLite).
+   - The platform automatically parses and indexes the data for search and analysis.
+
+2. Conduct Forensic Analysis
+   #### Search Capabilities
+
+   - Use the search bar to perform queries using Lucene syntax, including operators like AND, NOT, wildcards, and regex.
+   - Example query:
+      ```
+      appName:"Windows Explorer" OR appName:"Microsoft Edge"
+      ```
+   #### Semantic Search
+   - Utilize the semantic search feature to check for the presence of search item
+      ```
+      screenshot:monkey
+      ```
+   - The system will process the query through the integrated BLIP model to return relevant screenshots and parsed data.
+   - The semantic search API can also be tested by accessing the FastAPI endpoint at:
+      ```
+      http://localhost:8000/docs
+      ```
+
+# Contributing
+We welcome contributions to RECON! Please fork the repository, make your changes, and submit a pull request. For major changes, open an issue to discuss your proposed enhancements.
